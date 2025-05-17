@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Invaders</string>
+    <string name="please_turn_up_your_volume">Please turn up your volume</string>
+    <string name="copyright">music : maoudamashii</string>
 </resources>
