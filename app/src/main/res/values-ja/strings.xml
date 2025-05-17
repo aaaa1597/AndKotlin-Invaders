@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Invaders</string>
+    <string name="please_turn_up_your_volume">音が再生されます。\n音量を調整してください。</string>
+    <string name="copyright">音楽：魔王魂</string>
+</resources>
