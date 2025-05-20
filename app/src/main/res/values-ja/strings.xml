@@ -1,5 +1,7 @@
 <resources>
-    <string name="app_name">Invaders</string>
-    <string name="please_turn_up_your_volume">音が再生されます。\n音量を調整してください。</string>
+    <string name="app_name">Space Invaders</string>
     <string name="copyright">音楽：魔王魂</string>
+    <string name="start_game">Start Game</string>
+    <string name="view_scores">Scoresを見る</string>
+    <string name="exit">Exit</string>
 </resources>

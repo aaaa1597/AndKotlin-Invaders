@@ -6,28 +6,18 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import androidx.transition.Fade
 import androidx.transition.Scene
 import androidx.transition.Transition
 import androidx.transition.TransitionManager
-import androidx.viewbinding.ViewBinding
 import com.aaa.andkotlininvaders.databinding.ActivityMainBinding
-import com.aaa.andkotlininvaders.databinding.GameInitScreenBinding
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-
-data class SceneContainer<Binding : ViewBinding>(val binding: Binding, val scene: Scene)
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
     val viewModel by lazy {
         ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[MainViewModel::class.java]
     }
-    lateinit var initScene: SceneContainer<GameInitScreenBinding>
 //    lateinit var levelCompleteScene: SceneContainer<LevelCompleteSceneBinding>
 //    lateinit var levelZeroGameScene: SceneContainer<LevelZeroGameBinding>
 //    lateinit var levelStartWarpScene: SceneContainer<LevelStartWarpSceneBinding>
@@ -63,23 +53,14 @@ class MainActivity : AppCompatActivity() {
 
         onBackPressedDispatcher.addCallback(object: OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                when (viewModel.observeScreenState().value) {
-                    ScreenStates.GameMenu -> finish()
-                    else -> viewModel.updateUIState(ScreenStates.GameMenu)
-                }
             }
         })
 
         initScenes()
-        observeScreenStates()
+//        observeScreenStates()
     }
 
     private fun initScenes() {
-        initScene =
-            GameInitScreenBinding.inflate(layoutInflater, binding.root, false).let {
-                SceneContainer(it, Scene(binding.rootContainer, it.root))
-            }
-
 //        gameMenuScene =
 //            MainMenuSceneBinding.inflate(layoutInflater, binding.root, false).let {
 //                SceneContainer(it, Scene(binding.rootContainer, it.root))
@@ -136,10 +117,6 @@ class MainActivity : AppCompatActivity() {
 //        showLevelCompleteScene(ammoCount)
 //    }
 
-    internal fun showLevelCompleteScene(ammoCount: Int) {
-        viewModel.updateUIState(ScreenStates.LevelComplete(ammoCount))
-    }
-
 //    override fun onCanonReady(enemyX: Float, enemyY: Float) {
 //        gameScene.binding.bulletView.fire(enemyX, enemyY, BulletView.Sender.ENEMY)
 //    }
@@ -149,7 +126,7 @@ class MainActivity : AppCompatActivity() {
 //    }
 
     fun resetGameScene() {
-        binding.rootContainer.removeAllViews()
+//        binding.rootContainer.removeAllViews()
 //        levelCompleteScene =
 //            LevelCompleteSceneBinding.inflate(layoutInflater, binding.root, false).let {
 //                SceneContainer(it, Scene(binding.rootContainer, it.root))
@@ -202,23 +179,22 @@ class MainActivity : AppCompatActivity() {
         uiEventJob.cancel()
     }
 
-    private fun observeScreenStates() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.observeScreenState().collect {
-                    uiEventJob.cancel()
-                    when (it) {
-                        ScreenStates.AppInit -> {
-                            backgroundMusicManager.startPlaying()
-                            transitionTo(initScene.scene, Fade(Fade.MODE_IN))
-                        }
-
-                        else -> {
-
-                        }
-                    }
-                }
-            }
-        }
-    }
+//    private fun observeScreenStates() {
+//        lifecycleScope.launch {
+//            repeatOnLifecycle(Lifecycle.State.STARTED) {
+//                viewModel.observeScreenState().collect {
+//                    uiEventJob.cancel()
+//                    when (it) {
+//                        ScreenStates.AppInit -> {
+//                            backgroundMusicManager.startPlaying()
+//                        }
+//
+//                        else -> {
+//
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 }

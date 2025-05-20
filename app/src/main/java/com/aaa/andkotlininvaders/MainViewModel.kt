@@ -1,33 +1,21 @@
 package com.aaa.andkotlininvaders
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 class MainViewModel : ViewModel() {
-    var previousState: ScreenStates = ScreenStates.AppInit
-    private val screenStateFlow: MutableStateFlow<ScreenStates>
-        = MutableStateFlow(ScreenStates.AppInit)
-    fun observeScreenState(): StateFlow<ScreenStates>
-        = screenStateFlow
-    fun updateUIState(screenStates: ScreenStates) {
-        if (screenStateFlow.value != screenStates) {
-            previousState = screenStateFlow.value
-            screenStateFlow.value = screenStates
-        }
+    /* ミュート設定 */
+    private val _mute: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val mute = _mute.asStateFlow()
+    fun toggleMute() {
+        _mute.value = !_mute.value
+        if(_mute.value)
+            Log.d("aaaaa", "aaaaa _mute.value=${_mute.value}")
+        else
+            Log.d("aaaaa", "aaaaa _mute.value=${_mute.value}")
     }
-}
 
-sealed class ScreenStates {
-    object AppInit : ScreenStates()
-    object GameMenu : ScreenStates()
-    object LevelStart : ScreenStates()
-    object StartLevelZero : ScreenStates()
-    object StartGame : ScreenStates()
-    object ViewHighScores : ScreenStates()
-    object LevelStartWarp : ScreenStates()
-    data class LevelComplete(val bulletCount: Int) : ScreenStates()
-    object YouDied : ScreenStates()
-    object RanOutOfAmmo : ScreenStates()
-    object GameOver : ScreenStates()
 }

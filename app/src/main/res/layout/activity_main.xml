@@ -9,9 +9,12 @@
     android:keepScreenOn="true"
     tools:context=".MainActivity">
 
-    <FrameLayout
-        android:id="@+id/root_container"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fcv_container"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:defaultNavHost="true"
+        app:navGraph="@navigation/screenflownavi" />
 
 </com.aaa.andkotlininvaders.StarsBackgroundFrameLayout>
