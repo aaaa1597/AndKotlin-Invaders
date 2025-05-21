@@ -5,7 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-    import com.aaa.andkotlininvaders.databinding.FragmentMainMenuBinding
+import androidx.navigation.fragment.findNavController
+import com.aaa.andkotlininvaders.databinding.FragmentMainMenuBinding
 
 class MainMenuFragment : Fragment() {
     private lateinit var _binding: FragmentMainMenuBinding
@@ -24,6 +25,20 @@ class MainMenuFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        /* ゲーム開始 */
+        _binding.btnStart.setOnClickListener {
+
+        }
+
+        /* スコア画面 */
+        _binding.btnViewScores.setOnClickListener {
+            findNavController().navigate(R.id.action_to_highScores_zoom)
+        }
+
+        /* 終了ボタン */
+        _binding.btnExit.setOnClickListener {
+            requireActivity().finish()
+        }
     }
 
     companion object {
