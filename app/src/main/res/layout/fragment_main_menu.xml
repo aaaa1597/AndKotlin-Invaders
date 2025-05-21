@@ -7,22 +7,31 @@
     android:layout_height="match_parent"
     tools:context=".MainMenuFragment">
 
-    <com.aaa.andkotlininvaders.LogoTextView
-        android:id="@+id/logoView"
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:id="@+id/fLy_logo"
+        android:layout_width="0dp"
         android:layout_height="0dp"
-        android:letterSpacing="0.1"
-        android:gravity="center"
-        android:padding="24dp"
-        android:text="@string/app_name"
-        android:textColor="@color/secondaryFontColor"
-        android:textSize="29sp"
-        android:textStyle="italic|bold"
-        app:fontFamily="@font/naguri"
+        android:clipChildren="false"
         app:layout_constraintHeight_percent="0.55"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.aaa.andkotlininvaders.LogoTextView
+            android:id="@+id/logoView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:letterSpacing="0.1"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:padding="24dp"
+            android:text="@string/app_name"
+            android:textColor="@color/secondaryFontColor"
+            android:textSize="29sp"
+            android:textStyle="italic|bold"
+            app:fontFamily="@font/naguri" />
+
+    </FrameLayout>
 
     <com.aaa.andkotlininvaders.MenuButtonView
         android:id="@+id/btn_start"
@@ -30,7 +39,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="@string/start_game"
-        app:layout_constraintTop_toBottomOf="@+id/logoView"
+        app:layout_constraintTop_toBottomOf="@+id/fLy_logo"
         app:layout_constraintBottom_toTopOf="@+id/btn_view_scores"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
