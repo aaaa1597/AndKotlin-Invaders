@@ -1,6 +1,7 @@
 package com.aaa.andkotlininvaders
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -39,14 +40,20 @@ class MainMenuFragment : Fragment() {
         _binding.btnExit.setOnClickListener {
             requireActivity().finish()
         }
-    }
 
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            MainMenuFragment().apply {
-                arguments = Bundle().apply {
-                }
+        _binding.root.viewTreeObserver.addOnGlobalLayoutListener {
+            _binding.btnStart.apply {
+                postDelayed({animate().translationY(y).setDuration(300)}, 100)
+                y = 0f
             }
+            _binding.btnViewScores.apply {
+                postDelayed({animate().translationY(y).setDuration(300)}, 200)
+                y = 0f
+            }
+            _binding.btnExit.apply {
+                postDelayed({animate().translationY(y).setDuration(300)}, 300)
+                y = 0f
+            }
+        }
     }
 }
