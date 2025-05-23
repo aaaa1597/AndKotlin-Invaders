@@ -17,10 +17,22 @@
             app:exitAnim="@anim/nav_zoom_exit_anim"
             app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
             app:popExitAnim="@anim/nav_zoom_pop_exit_anim" />
+        <action
+            android:id="@+id/action_to_countdown_zoom"
+            app:destination="@id/countdownFragment"
+            app:enterAnim="@anim/nav_zoom_enter_anim"
+            app:exitAnim="@anim/nav_zoom_exit_anim"
+            app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
+            app:popExitAnim="@anim/nav_zoom_pop_exit_anim" />
     </fragment>
     <fragment
         android:id="@+id/highScoresFragment"
         android:name="com.aaa.andkotlininvaders.HighScoresFragment"
         android:label="fragment_high_scores"
         tools:layout="@layout/fragment_high_scores" />
+    <fragment
+        android:id="@+id/countdownFragment"
+        android:name="com.aaa.andkotlininvaders.CountdownFragment"
+        android:label="fragment_countdown"
+        tools:layout="@layout/fragment_countdown"/>
 </navigation>

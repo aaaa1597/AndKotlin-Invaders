@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.aaa.andkotlininvaders.databinding.FragmentMainMenuBinding
@@ -29,7 +30,8 @@ class MainMenuFragment : Fragment() {
 
         /* ゲーム開始 */
         _binding.btnStart.setOnClickListener {
-
+            val bundle = bundleOf("LEVEL" to 1)
+            findNavController().navigate(R.id.action_to_countdown_zoom, bundle)
         }
 
         /* スコア画面 */
