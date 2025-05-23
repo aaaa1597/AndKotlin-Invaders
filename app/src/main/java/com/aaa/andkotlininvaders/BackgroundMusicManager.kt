@@ -10,9 +10,13 @@ class BackgroundMusicManager(private val context: Context) : DefaultLifecycleObs
     private var mediaPlayer: MediaPlayer? = null
 
     fun startPlaying() {
-        if(mediaPlayer?.isPlaying != true) {
+        if(mediaPlayer?.isPlaying != true)
             mediaPlayer?.start()
-        }
+    }
+
+    fun stopPlaying() {
+        mediaPlayer?.stop()
+        mediaPlayer?.prepare()
     }
 
     override fun onCreate(owner: LifecycleOwner) {

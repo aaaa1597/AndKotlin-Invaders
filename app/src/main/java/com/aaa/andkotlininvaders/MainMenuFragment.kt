@@ -13,6 +13,11 @@ import com.aaa.andkotlininvaders.databinding.FragmentMainMenuBinding
 
 class MainMenuFragment : Fragment() {
     private lateinit var _binding: FragmentMainMenuBinding
+    private val backgroundMusicManager by lazy {
+        BackgroundMusicManager(requireContext()).apply {
+            lifecycle.addObserver(this)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,5 +74,15 @@ class MainMenuFragment : Fragment() {
                 postDelayed({animate().translationY(0f).setDuration(300)}, 700)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        backgroundMusicManager.startPlaying()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        backgroundMusicManager.stopPlaying()
     }
 }

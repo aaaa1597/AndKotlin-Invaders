@@ -28,12 +28,6 @@ class MainActivity : AppCompatActivity() {
 //    lateinit var gameOverScene: SceneContainer<GameOverSceneBinding>
 //    lateinit var highScoreScene: SceneContainer<HighscoresSceneBinding>
 
-    private val backgroundMusicManager by lazy {
-        BackgroundMusicManager(applicationContext).apply {
-            lifecycle.addObserver(this)
-        }
-    }
-
     private val transitionManager by lazy {
         TransitionManager()
     }
