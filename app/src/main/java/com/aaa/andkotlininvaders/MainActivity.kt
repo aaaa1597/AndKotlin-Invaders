@@ -15,8 +15,8 @@ import kotlinx.coroutines.Job
 
 class MainActivity : AppCompatActivity() {
     lateinit var binding: ActivityMainBinding
-    val viewModel by lazy {
-        ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[MainViewModel::class.java]
+    val mainActivityViewModel by lazy {
+        ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[MainActivityViewModel::class.java]
     }
 //    lateinit var levelCompleteScene: SceneContainer<LevelCompleteSceneBinding>
 //    lateinit var levelZeroGameScene: SceneContainer<LevelZeroGameBinding>

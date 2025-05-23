@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.aaa.andkotlininvaders.databinding.FragmentMainMenuBinding
 
@@ -42,17 +43,24 @@ class MainMenuFragment : Fragment() {
         }
 
         _binding.root.viewTreeObserver.addOnGlobalLayoutListener {
+            if(lifecycle.currentState != Lifecycle.State.RESUMED)
+                return@addOnGlobalLayoutListener
+
+            Log.d("aaaaa", "aaaaa R.id.main(left,top,right,bottom)=(${_binding.root.left},${_binding.root.top},${_binding.root.right},${_binding.root.bottom})")
+            Log.d("aaaaa", "aaaaa R.id.main(x,y,translationX,translationY)=(${_binding.root.x},${_binding.root.y},${_binding.root.translationX},${_binding.root.translationY})")
+            Log.d("aaaaa", "aaaaa R.id.main(left+translationX,top+translationY)=(${_binding.root.left+_binding.root.translationX},${_binding.root.top+_binding.root.translationY}})")
+
             _binding.btnStart.apply {
-                postDelayed({animate().translationY(y).setDuration(300)}, 100)
-                y = 0f
+                translationY = -(top+height.toFloat())
+                postDelayed({animate().translationY(0f).setDuration(300)}, 100)
             }
             _binding.btnViewScores.apply {
-                postDelayed({animate().translationY(y).setDuration(300)}, 200)
-                y = 0f
+                translationY = -(top+height.toFloat())
+                postDelayed({animate().translationY(0f).setDuration(300)}, 200)
             }
             _binding.btnExit.apply {
-                postDelayed({animate().translationY(y).setDuration(300)}, 300)
-                y = 0f
+                translationY = -(top+height.toFloat())
+                postDelayed({animate().translationY(0f).setDuration(300)}, 300)
             }
         }
     }
