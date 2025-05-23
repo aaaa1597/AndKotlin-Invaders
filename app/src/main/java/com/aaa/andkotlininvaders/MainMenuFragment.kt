@@ -52,17 +52,21 @@ class MainMenuFragment : Fragment() {
             Log.d("aaaaa", "aaaaa R.id.main(x,y,translationX,translationY)=(${_binding.root.x},${_binding.root.y},${_binding.root.translationX},${_binding.root.translationY})")
             Log.d("aaaaa", "aaaaa R.id.main(left+translationX,top+translationY)=(${_binding.root.left+_binding.root.translationX},${_binding.root.top+_binding.root.translationY}})")
 
+            _binding.logoView.apply {
+                translationY = -(top+height.toFloat()+20)
+                postDelayed({animate().translationY(0f).setDuration(300)}, 600)
+            }
             _binding.btnStart.apply {
                 translationY = -(top+height.toFloat())
-                postDelayed({animate().translationY(0f).setDuration(300)}, 100)
+                postDelayed({animate().translationY(0f).setDuration(300)}, 300)
             }
             _binding.btnViewScores.apply {
                 translationY = -(top+height.toFloat())
-                postDelayed({animate().translationY(0f).setDuration(300)}, 200)
+                postDelayed({animate().translationY(0f).setDuration(300)}, 500)
             }
             _binding.btnExit.apply {
                 translationY = -(top+height.toFloat())
-                postDelayed({animate().translationY(0f).setDuration(300)}, 300)
+                postDelayed({animate().translationY(0f).setDuration(300)}, 700)
             }
         }
     }

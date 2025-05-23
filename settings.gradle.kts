@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Invaders"
+rootProject.name = "AndKotlin-Invaders"
 include(":app")
