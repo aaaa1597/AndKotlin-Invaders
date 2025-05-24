@@ -7,6 +7,7 @@ import android.graphics.CornerPathEffect
 import android.graphics.Paint
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.lifecycle.findViewTreeLifecycleOwner
 
 class LogoTextView: AppCompatTextView {
     /* Viewを継承するときのお約束 */

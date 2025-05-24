@@ -9,4 +9,5 @@
     <string name="title_countdown">Level %1$d Start</string>
     <string name="countdown_startvalue">3</string>
     <string name="str_copyright">music：maoudamashi</string>
+    <string name="score_tmpval">1234</string>
 </resources>
