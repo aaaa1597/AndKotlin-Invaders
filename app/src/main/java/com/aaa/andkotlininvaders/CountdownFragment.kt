@@ -41,7 +41,7 @@ class CountdownFragment : Fragment() {
                 delay(1000)
             }
             /* 完了後、ゲーム画面に遷移 */
-//            findNavController().navigate(R.id.action_to_countdown_zoom)
+            findNavController().navigate(R.id.action_to_gameScene_zoom)
         }
     }
 

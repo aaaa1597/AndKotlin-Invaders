@@ -53,9 +53,9 @@ class MainMenuFragment : Fragment() {
             if(lifecycle.currentState != Lifecycle.State.RESUMED)
                 return@addOnGlobalLayoutListener
 
-            Log.d("aaaaa", "aaaaa R.id.main(left,top,right,bottom)=(${_binding.root.left},${_binding.root.top},${_binding.root.right},${_binding.root.bottom})")
-            Log.d("aaaaa", "aaaaa R.id.main(x,y,translationX,translationY)=(${_binding.root.x},${_binding.root.y},${_binding.root.translationX},${_binding.root.translationY})")
-            Log.d("aaaaa", "aaaaa R.id.main(left+translationX,top+translationY)=(${_binding.root.left+_binding.root.translationX},${_binding.root.top+_binding.root.translationY}})")
+            Log.d("aaaaa", "aaaaa MainMenuFragment::onViewCreated() R.id.main(left,top,right,bottom)=(${_binding.root.left},${_binding.root.top},${_binding.root.right},${_binding.root.bottom})")
+            Log.d("aaaaa", "aaaaa MainMenuFragment::onViewCreated() R.id.main(x,y,translationX,translationY)=(${_binding.root.x},${_binding.root.y},${_binding.root.translationX},${_binding.root.translationY})")
+            Log.d("aaaaa", "aaaaa MainMenuFragment::onViewCreated() R.id.main(left+translationX,top+translationY)=(${_binding.root.left+_binding.root.translationX},${_binding.root.top+_binding.root.translationY}})")
 
             _binding.logoView.apply {
                 translationY = -(top+height.toFloat()+20)

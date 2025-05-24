@@ -34,5 +34,20 @@
         android:id="@+id/countdownFragment"
         android:name="com.aaa.andkotlininvaders.CountdownFragment"
         android:label="fragment_countdown"
-        tools:layout="@layout/fragment_countdown"/>
+        tools:layout="@layout/fragment_countdown">
+        <action
+            android:id="@+id/action_to_gameScene_zoom"
+            app:destination="@id/gameSceneFragment"
+            app:enterAnim="@anim/nav_zoom_enter_anim"
+            app:exitAnim="@anim/nav_zoom_exit_anim"
+            app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
+            app:popExitAnim="@anim/nav_zoom_pop_exit_anim"
+            app:popUpTo="@id/mainMenuFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+    <fragment
+        android:id="@+id/gameSceneFragment"
+        android:name="com.aaa.andkotlininvaders.GameSceneFragment"
+        android:label="fragment_game_scene"
+        tools:layout="@layout/fragment_game_scene" />
 </navigation>
