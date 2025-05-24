@@ -23,9 +23,16 @@ class GameSceneFragment : Fragment() {
         super.onCreate(savedInstanceState)
         viewModel.init()
 
+        /* 得点の監視処理 */
+        lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            viewModel.scoreFlow.collect{
+                _binding.txtScore.text = it.toString()
+            }
+        }}
+
         /* 弾薬数の監視処理 */
         lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            viewModel.uiState.collect {
+            viewModel.bulletCountFlow.collect {
                 /* 更新前保持 */
                 val preval: Int = _binding.txtBulletcounter.text.toString().toIntOrNull() ?: 0
                 /* 弾薬数更新 */

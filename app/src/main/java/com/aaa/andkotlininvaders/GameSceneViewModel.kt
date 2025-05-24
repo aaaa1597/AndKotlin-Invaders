@@ -8,19 +8,24 @@ class GameSceneViewModel : ViewModel() {
     /* 全初期化 */
     fun init() {
         setInitBullet(REFILL)
+        _scoreFlow.value = 0
     }
     /* 残り弾薬数 */
     private var initBullet = 1  /* 最初に与えられる弾薬数(これが残弾アラートの基準になる) */
     private lateinit var _bulletCountFlow: MutableStateFlow<Int>
-    val uiState: StateFlow<Int> = _bulletCountFlow
+    val bulletCountFlow: StateFlow<Int> = _bulletCountFlow
     /* 残弾アラート取得 */
     fun isRemainRed(): Boolean
-        = ((uiState.value.toFloat()/initBullet) < 0.25)
+        = ((bulletCountFlow.value.toFloat()/initBullet) < 0.25)
     /* 残弾数初期化 */
     fun setInitBullet(remain: Int) {
         initBullet = remain
         _bulletCountFlow = MutableStateFlow(remain)
     }
+
+    /* 得点 */
+    private val _scoreFlow: MutableStateFlow<Int> = MutableStateFlow(0)
+    val scoreFlow: StateFlow<Int> = _scoreFlow
 
     companion object {
         const val REFILL = 80
