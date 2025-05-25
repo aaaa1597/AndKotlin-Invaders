@@ -6,7 +6,7 @@ import android.util.Log
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 
-class BackgroundMusicManager(private val context: Context) : DefaultLifecycleObserver {
+class BackgroundMusicManager(private val context: Context): DefaultLifecycleObserver {
     private var mediaPlayer: MediaPlayer? = null
 
     fun startPlaying() {
