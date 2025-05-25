@@ -35,4 +35,23 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.aaa.andkotlininvaders.ContainerView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@id/viw_lifegauge"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/txt_score">
+
+
+
+    </com.aaa.andkotlininvaders.ContainerView>
+
+    <com.aaa.andkotlininvaders.LifeGaugeView
+        android:id="@+id/viw_lifegauge"
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

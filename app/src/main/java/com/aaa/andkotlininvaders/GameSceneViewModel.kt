@@ -1,6 +1,8 @@
 package com.aaa.andkotlininvaders
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -12,15 +14,16 @@ class GameSceneViewModel : ViewModel() {
     }
     /* 残り弾薬数 */
     private var initBullet = 1  /* 最初に与えられる弾薬数(これが残弾アラートの基準になる) */
-    private lateinit var _bulletCountFlow: MutableStateFlow<Int>
+    private val _bulletCountFlow =  MutableStateFlow(0)
     val bulletCountFlow: StateFlow<Int> = _bulletCountFlow
     /* 残弾アラート取得 */
     fun isRemainRed(): Boolean
         = ((bulletCountFlow.value.toFloat()/initBullet) < 0.25)
     /* 残弾数初期化 */
     fun setInitBullet(remain: Int) {
+        Log.d("aaaaa", "aaaaa GameSceneViewModel::setInitBullet()")
         initBullet = remain
-        _bulletCountFlow = MutableStateFlow(remain)
+        _bulletCountFlow.value = remain
     }
 
     /* 得点 */
@@ -29,5 +32,15 @@ class GameSceneViewModel : ViewModel() {
 
     companion object {
         const val REFILL = 80
+    }
+
+    object LifeGaugeInfo {
+        const val MAX_HEALTH = 20
+        private val playerLife = MutableStateFlow(MAX_HEALTH)
+
+        fun getPlayerLifeFlow(): Flow<Int> = playerLife
+        fun getPlayerHealthValue() = playerLife.value
+        fun onHit() { playerLife.value -= 2 }
+        fun resetHealth() { playerLife.value = 20}
     }
 }
