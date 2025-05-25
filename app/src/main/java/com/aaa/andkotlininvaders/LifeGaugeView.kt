@@ -40,7 +40,7 @@ class LifeGaugeView: View {
         }
     }
 
-    private val healthProgress by lazy {
+    private val lifeProgressPaint by lazy {
         Paint().apply {
             color = Color.parseColor("#DD3D1F")
             style = Paint.Style.STROKE
@@ -57,7 +57,7 @@ class LifeGaugeView: View {
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        progressLength = map(LifeGaugeInfo.getPlayerHealthValue(),0, LifeGaugeInfo.MAX_HEALTH
+        progressLength = map(LifeGaugeInfo.getPlayerLifeValue(),0, LifeGaugeInfo.MAX_LIFEGAUGE
                                                                  , measuredHeight, measuredWidth)
     }
 
@@ -70,11 +70,11 @@ class LifeGaugeView: View {
     private fun startCollectLile() {
         val lifecycleOwner = findViewTreeLifecycleOwner()!!
         lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            GameSceneViewModel.LifeGaugeInfo.getPlayerLifeFlow().collect {life ->
+            GameSceneViewModel.LifeGaugeInfo.getPlayerLifeFlow().collect { life ->
                 launch {
                     if(life <= 0)
                         onLifeEmpty?.invoke()
-                    val progress = map(life, 0, LifeGaugeInfo.MAX_HEALTH, measuredHeight, measuredWidth)
+                    val progress = map(life, 0, LifeGaugeInfo.MAX_LIFEGAUGE, measuredHeight, measuredWidth)
                     animateProgress(progress)
                 }
             }
@@ -104,7 +104,7 @@ class LifeGaugeView: View {
     override fun onDraw(canvas: Canvas) {
         val radius = measuredHeight / 2F
         canvas.drawCircle(radius + paddingLeft, radius + paddingTop, radius, circlePaint)
-        canvas.drawLine(measuredHeight.toFloat(), radius, progressLength, radius, healthProgress)
+        canvas.drawLine(measuredHeight.toFloat(), radius, progressLength, radius, lifeProgressPaint)
         val path = createHeartPath(2 * (radius.roundToInt() + paddingLeft), measuredHeight)
         canvas.drawPath(path, heartPaint)
     }

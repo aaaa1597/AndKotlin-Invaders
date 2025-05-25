@@ -35,11 +35,11 @@ class GameSceneViewModel : ViewModel() {
     }
 
     object LifeGaugeInfo {
-        const val MAX_HEALTH = 20
-        private val playerLife = MutableStateFlow(MAX_HEALTH)
+        const val MAX_LIFEGAUGE = 20
+        private val playerLife = MutableStateFlow(MAX_LIFEGAUGE)
 
         fun getPlayerLifeFlow(): Flow<Int> = playerLife
-        fun getPlayerHealthValue() = playerLife.value
+        fun getPlayerLifeValue() = playerLife.value
         fun onHit() { playerLife.value -= 2 }
         fun resetHealth() { playerLife.value = 20}
     }
