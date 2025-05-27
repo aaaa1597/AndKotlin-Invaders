@@ -86,7 +86,7 @@ class SpaceShipView: View, RigidBodyObject {
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        Log.d("aaaaa", "aaaaa onSizeChanged() aaaaaaaaaa")
+        Log.d("aaaaa", "aaaaa onSizeChanged() aaaaaaaaaa w,h=(${oldw},${oldh} -> ${w},${h}) (x,y)=(${x},${y})")
         super.onSizeChanged(w, h, oldw, oldh)
         halfWidth = w / 2F
         getDrawingRect(displayRect)
@@ -171,5 +171,11 @@ class SpaceShipView: View, RigidBodyObject {
         path.close()
         canvas.drawPath(path, bodyPaint)
         canvas.drawPath(path, wingsPaintOutline)
+    }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        pictureDrawable.bounds = displayRect
+        pictureDrawable.draw(canvas)
     }
 }
