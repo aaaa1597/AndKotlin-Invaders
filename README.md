@@ -43,10 +43,16 @@ opt 初期化(onSizeChanged)
     SpaceShipView->>ViewCanvas: 機翼Draw
     SpaceShipView->>ViewCanvas: endRecording
     SpaceShipView->>SpaceShipView: postInvalidate
+    OS->>SpaceShipView: onDraw
+    SpaceShipView->>PictureDrawable: draw()
 end
 opt ゲーム開始
     OS->>SpaceShipView: startGame
     SpaceShipView->>SpaceShipView: 加速度センサ読込み開始
+end
+opt 加速度センサ 値変化通知
+    OS->>SpaceShipView: processSensorEvents
+    SpaceShipView->>SpaceShipView: processValues
 end
 
 ```

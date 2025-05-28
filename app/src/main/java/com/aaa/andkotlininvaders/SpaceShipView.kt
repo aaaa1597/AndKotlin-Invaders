@@ -16,15 +16,9 @@ import java.util.UUID
 
 class SpaceShipView: View, RigidBodyObject {
     /* Viewを継承するときのお約束 */
-    constructor(context: Context) : super(context) {
-        Log.d("aaaaa", "aaaaa constructor 001 aaaaaaaaaa")
-    }
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        Log.d("aaaaa", "aaaaa constructor 002 aaaaaaaaaa")
-    }
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
-        Log.d("aaaaa", "aaaaa constructor 003 aaaaaaaaaa")
-    }
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var halfWidth = 0F
     private var halfHeight = 0F
