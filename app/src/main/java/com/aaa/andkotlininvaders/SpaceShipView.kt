@@ -11,8 +11,16 @@ import android.graphics.drawable.PictureDrawable
 import android.util.AttributeSet
 import android.util.Log
 import android.util.Range
+import android.view.MotionEvent
 import android.view.View
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import java.util.UUID
+import kotlin.math.roundToInt
 
 class SpaceShipView: View, RigidBodyObject {
     /* Viewを継承するときのお約束 */
@@ -77,6 +85,43 @@ class SpaceShipView: View, RigidBodyObject {
 
     override fun checkCollision(softBodyObjectData: SoftBodyObjectData) {
         TODO("Not yet implemented")
+    }
+
+    /* ワーニング対応 onTouchEvent()をoverrideしたら、performClick()を呼ばんといかんらしい　*/
+    override fun performClick(): Boolean = super.performClick()
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        /* タッチイベント定義 */
+        setOnTouchListener { _, motionEvent ->
+            Log.d("aaaaa", "aaaaa motionEvent=(${motionEvent.x},${motionEvent.action})")
+            when(motionEvent.action) {
+                MotionEvent.ACTION_DOWN,
+                MotionEvent.ACTION_MOVE,
+                MotionEvent.ACTION_UP -> {
+                    GameSceneViewModel.SpaceShipViewInfo.setXPos(motionEvent.x)
+                    return@setOnTouchListener true
+                }
+            }
+            return@setOnTouchListener performClick()
+        }
+
+        /* 自機移動 */
+        findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
+            findViewTreeLifecycleOwner()?.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                GameSceneViewModel.SpaceShipViewInfo.xPos.collect {
+                    if (it > wingWidth && it < measuredWidth - wingWidth) {
+                        currentShipPosition = it
+                        mainBodyXRange  = Range(currentShipPosition-24, currentShipPosition+24)
+                        leftWingsXRange = Range(currentShipPosition-wingWidth, mainBodyXRange.lower)
+                        rightWingsXRange= Range(mainBodyXRange.upper, currentShipPosition+wingWidth)
+                        displayRect.set((it-halfWidth).roundToInt(),0,
+                                        (it+halfWidth).roundToInt(), measuredHeight)
+                        invalidate()
+                    }
+                }
+            }
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

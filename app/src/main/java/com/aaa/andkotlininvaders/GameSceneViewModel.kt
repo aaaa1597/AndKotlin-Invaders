@@ -43,4 +43,10 @@ class GameSceneViewModel : ViewModel() {
         fun onHit() { playerLife.value -= 2 }
         fun resetHealth() { playerLife.value = 20}
     }
+
+    object SpaceShipViewInfo {
+        private val _xPos = MutableStateFlow(600f)
+        val xPos: StateFlow<Float> = _xPos
+        fun setXPos(x: Float) { _xPos.value = x}
+    }
 }

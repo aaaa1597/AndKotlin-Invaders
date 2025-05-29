@@ -1,5 +1,6 @@
 package com.aaa.andkotlininvaders
 
+import android.graphics.Rect
 import android.os.Bundle
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
@@ -18,15 +19,6 @@ class MainActivity : AppCompatActivity() {
     val mainActivityViewModel by lazy {
         ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[MainActivityViewModel::class.java]
     }
-//    lateinit var levelCompleteScene: SceneContainer<LevelCompleteSceneBinding>
-//    lateinit var levelZeroGameScene: SceneContainer<LevelZeroGameBinding>
-//    lateinit var levelStartWarpScene: SceneContainer<LevelStartWarpSceneBinding>
-//    lateinit var gameMenuScene: SceneContainer<MainMenuSceneBinding>
-//    lateinit var youDiedScene: SceneContainer<YouDiedSceneBinding>
-//    lateinit var gameScene: SceneContainer<GameSceneBinding>
-//    lateinit var levelStartScene: SceneContainer<LevelStartSceneBinding>
-//    lateinit var gameOverScene: SceneContainer<GameOverSceneBinding>
-//    lateinit var highScoreScene: SceneContainer<HighscoresSceneBinding>
 
     private val transitionManager by lazy {
         TransitionManager()
@@ -35,8 +27,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-//        goFullScreen()
-//        initDataStore(this)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -45,13 +35,19 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        /* ジェスチャバックを無効化 */
+        binding.root.systemGestureExclusionRects = ArrayList<Rect>().apply {
+            add(Rect(0, android.R.attr.height - 650, android.R.attr.width, android.R.attr.height - 450))
+            add(Rect(0, android.R.attr.height - 450, android.R.attr.width, android.R.attr.height - 250))
+            add(Rect(0, android.R.attr.height - 250, android.R.attr.width, android.R.attr.height - 50))
+        }
+
         onBackPressedDispatcher.addCallback(object: OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
             }
         })
 
         initScenes()
-//        observeScreenStates()
     }
 
     private fun initScenes() {
