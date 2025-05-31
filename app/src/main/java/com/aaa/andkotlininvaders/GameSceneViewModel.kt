@@ -38,15 +38,16 @@ class GameSceneViewModel : ViewModel() {
         const val MAX_LIFEGAUGE = 20
         private val playerLife = MutableStateFlow(MAX_LIFEGAUGE)
 
+        fun init() {playerLife.value = MAX_LIFEGAUGE}
         fun getPlayerLifeFlow(): Flow<Int> = playerLife
         fun getPlayerLifeValue() = playerLife.value
         fun onHit() { playerLife.value -= 2 }
-        fun resetHealth() { playerLife.value = 20}
     }
 
     object SpaceShipViewInfo {
         private val _xPos = MutableStateFlow(600f)
         val xPos: StateFlow<Float> = _xPos
+        fun init() { _xPos.value = 600f }
         fun setXPos(x: Float) { _xPos.value = x}
     }
 }

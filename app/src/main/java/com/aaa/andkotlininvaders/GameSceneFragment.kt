@@ -68,6 +68,21 @@ class GameSceneFragment : Fragment() {
         return _binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val soundManager = SoundManager(requireContext())
+        lifecycle.addObserver(soundManager)
+        view.findViewById<BulletView>(R.id.viw_bulletView).setSoundManager(soundManager)
+    }
+
+    override fun onResume() {
+        super.onResume()
+    }
+
+    override fun onPause() {
+        super.onPause()
+    }
+
     companion object {
         fun newInstance() = GameSceneFragment()
     }

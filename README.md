@@ -58,3 +58,30 @@ end
 ```
 
 ### BulletViewのシーケンス
+
+```mermaid
+%% SpaceShipViewのシーケンス
+sequenceDiagram
+    autonumber
+    participant OS
+    participant BulletView
+    participant Bullet as SoftBodyObject<br/>↑<br/>Bullet
+    participant SoundManager
+    participant SoftBodyObjectTracker as SoftBodyObject.<br/>SoftBodyObjectTracker
+    participant BulletList as MutableList<Bullet>
+
+opt 初期化処理(xml配置/コンストラクタ)
+    OS->>BulletView: xml配置
+    BulletView->>BulletView: コンストラクタ
+    BulletView->>BulletList: Bulletリスト生成
+end
+
+opt 画面遷移Start
+    OS->>BulletView: GameScene遷移<br/>(SpaceShipView生成)
+    Note right of BulletView: 自機登場アニメ開始(1200[ms])
+    Note right of BulletView: 敵機登場アニメ開始(2200[ms])
+    BulletView->>BulletView: onEnd(アニメーションEnd)
+    BulletView->>SoundManager: SoundManager生成
+end
+
+```
