@@ -97,14 +97,12 @@ sequenceDiagram
     participant OS
     participant MainActivity
     participant BulletView
-    participant Bullet as SoftBodyObject<br/>↑<br/>Bullet
-    participant SoftBodyObjectTracker as SoftBodyObject.<br/>SoftBodyObjectTracker
-    participant BulletList as MutableList<Bullet>
 
-    MainActivity->>MainActivity: onCanonReady
-    OS->>BulletView: onCanonReady
-    MainActivity->>BulletView: fire
-
+    opt 残弾数 > 0
+        OS->>BulletView: 画面タッチ
+    end
+    BulletView->>BulletView: fire
+    BulletView->>BulletView: postInvalidate
 ```
 
 #### onDraw
