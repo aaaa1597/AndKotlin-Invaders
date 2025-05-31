@@ -59,14 +59,16 @@ end
 
 ### BulletViewのシーケンス
 
+#### 初期化
+
 ```mermaid
-%% SpaceShipViewのシーケンス
+%% SpaceShipViewのシーケンス(初期化)
 sequenceDiagram
     autonumber
     participant OS
     participant BulletView
-    participant Bullet as SoftBodyObject<br/>↑<br/>Bullet
     participant SoundManager
+    participant Bullet as SoftBodyObject<br/>↑<br/>Bullet
     participant SoftBodyObjectTracker as SoftBodyObject.<br/>SoftBodyObjectTracker
     participant BulletList as MutableList<Bullet>
 
@@ -84,4 +86,48 @@ opt 画面遷移Start
     BulletView->>SoundManager: SoundManager生成
 end
 
+```
+
+#### fire
+
+```mermaid
+%% SpaceShipViewのシーケンス(fire)
+sequenceDiagram
+    autonumber
+    participant OS
+    participant MainActivity
+    participant BulletView
+    participant Bullet as SoftBodyObject<br/>↑<br/>Bullet
+    participant SoftBodyObjectTracker as SoftBodyObject.<br/>SoftBodyObjectTracker
+    participant BulletList as MutableList<Bullet>
+
+    MainActivity->>MainActivity: onCanonReady
+    OS->>BulletView: onCanonReady
+    MainActivity->>BulletView: fire
+
+```
+
+#### onDraw
+
+```mermaid
+%% SpaceShipViewのシーケンス(onDraw)
+sequenceDiagram
+    autonumber
+    participant OS
+    participant BulletView
+    participant Bullet as SoftBodyObject<br/>↑<br/>Bullet
+    participant SoftBodyObjectTracker as SoftBodyObject.<br/>SoftBodyObjectTracker
+    participant BulletList as MutableList<Bullet>
+
+    OS->>BulletView: onDraw
+    BulletView->>BulletView: コンストラクタ
+    BulletView->>BulletList: forEach
+    BulletList->>Bullet: drawObject()
+    BulletList->>Bullet: translateObject()
+    Bullet->>Bullet: translate()
+    opt objectYが画面外<br/>(objectY<0 or maxHeight<objectY)
+        Bullet->>SoftBodyObjectTracker: cancelTracking()
+    end
+    BulletView->>BulletList: cleanupBullets()
+    BulletView->>OS: invalidate()
 ```
