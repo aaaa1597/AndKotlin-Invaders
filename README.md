@@ -129,3 +129,60 @@ sequenceDiagram
     BulletView->>BulletList: cleanupBullets()
     BulletView->>OS: invalidate()
 ```
+
+#### 当たり判定(SpaceShipView)
+
+```mermaid
+%% SpaceShipViewのシーケンス(当たり判定)
+sequenceDiagram
+    autonumber
+    participant OS
+    participant MainActivity
+    participant BulletView
+    participant Bullet as SoftBodyObject<br/>↑<br/>Bullet
+    participant SoftBodyObjectTracker as SoftBodyObject.<br/>SoftBodyObjectTracker
+    participant BulletList as MutableList<Bullet>
+
+opt 初期化処理(xml配置)
+    OS->>MainActivity: xml配置
+    MainActivity->>BulletView: xml配置
+    MainActivity->>BulletView: softBodyObjectTrackerセット
+    Note right of BulletView: 実装: initBulletTracking<br/>(※中身はEnemiesView.checkCollision)
+    Note right of BulletView: 実装: cancelTracking<br/>(※中身はSpaceShipView.removeSoftBodyEntry)
+end
+
+```
+
+```mermaid
+%% SpaceShipViewのシーケンス(当たり判定)
+sequenceDiagram
+    autonumber
+    participant OS
+    participant MainActivity
+    participant SpaceShipView
+    participant BulletView
+    participant SoftBodyObject as SoftBodyObject<br/>↑<br/>Bullet
+
+opt 初期化処理(xml配置)
+    OS->>MainActivity: xml配置
+    MainActivity->>BulletView: xml配置
+    MainActivity->>BulletView: softBodyObjectTrackerセット
+    Note right of BulletView: 実装: initBulletTracking<br/>(※中身はEnemiesView.checkCollision)
+    Note right of BulletView: 実装: cancelTracking<br/>(※中身はSpaceShipView.removeSoftBodyEntry)
+end
+
+opt 初期化処理(ゲーム画面遷移)
+    MainActivity->>MainActivity: ゲーム画面遷移(ゲーム開始)
+    MainActivity->>MainActivity: initBulletTracking()
+    MainActivity->>SpaceShipView: Collisionチェック処理セット
+    SpaceShipView->>SoftBodyObject: Bullet位置監視セット
+    SoftBodyObject->>SoftBodyObject: Bullet位置変化 検知
+    SoftBodyObject->>SpaceShipView: 弾丸と自機とのコリジョンチェック
+    alt 自機ダメージ
+        SpaceShipView->>SpaceShipView: onPlayerHit() : ダメージ処理
+    else 褒美ゲット
+        SpaceShipView->>SpaceShipView: 得点ゲット
+    end
+end
+
+```
