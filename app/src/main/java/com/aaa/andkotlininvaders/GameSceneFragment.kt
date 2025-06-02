@@ -72,7 +72,7 @@ class GameSceneFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val soundManager = SoundManager(requireContext())
         lifecycle.addObserver(soundManager)
-        view.findViewById<BulletView>(R.id.viw_bulletView).setSoundManager(soundManager)
+        _binding.viwBulletView.setSoundManager(soundManager)
     }
 
     override fun onResume() {

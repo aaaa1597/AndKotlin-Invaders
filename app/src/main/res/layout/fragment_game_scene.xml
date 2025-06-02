@@ -63,7 +63,7 @@
             android:id="@+id/viw_spaceShipView"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:background="#11ff1100"
+            android:background="@color/burstFireOffColor"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHeight_percent="0.12"
             app:layout_constraintLeft_toLeftOf="parent"

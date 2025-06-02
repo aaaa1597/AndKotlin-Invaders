@@ -10,4 +10,6 @@
     <color name="shipShadowColor">#5C6373</color>
     <color name="shipHighLightColor">#9caebb</color>
     <color name="bulletColor">#fbcdcd</color>
+    <color name="burstFireOnColor">#88ee5544</color>
+    <color name="burstFireOffColor">#88335544</color>
 </resources>
