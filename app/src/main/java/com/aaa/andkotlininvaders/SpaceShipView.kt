@@ -37,7 +37,7 @@ class SpaceShipView: View {
     private var wingWidth = 0F
     private var missileSize = 0F
     private fun getShipX() = currentShipPosition
-    private fun getShipY(): Float = bodyTopPoint
+    private fun getShipY(): Float = bodyTopPoint+y
     private var displayRect = Rect()
     private var mainBodyXRange = Range(0F, 0F)
     private var mainBodyYRange = Range(0F, 0F)
