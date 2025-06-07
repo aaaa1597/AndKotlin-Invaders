@@ -32,13 +32,13 @@ class GameSceneFragment : Fragment() {
 
         /* 弾薬数の監視処理 */
         lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            viewModel.bulletCountFlow.collect {
+            GameSceneViewModel.BulletRemain.remainFlow.collect {
                 /* 更新前保持 */
                 val preval: Int = _binding.txtBulletcounter.text.toString().toIntOrNull() ?: 0
                 /* 弾薬数更新 */
                 _binding.txtBulletcounter.text = it.toString()
                 /* 弾薬数が25%以下になるなら赤字に */
-                if(viewModel.isRemainRed())
+                if(GameSceneViewModel.BulletRemain.isRemainRed())
                     _binding.txtBulletcounter.setTextColor(Color.RED)
                 else
                     _binding.txtBulletcounter.setTextColor(Color.WHITE)
@@ -72,7 +72,7 @@ class GameSceneFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val soundManager = SoundManager(requireContext())
         lifecycle.addObserver(soundManager)
-        _binding.viwBulletView.setSoundManager(soundManager)
+        _binding.viwSpaceShipView.fireSound =soundManager
     }
 
     override fun onResume() {

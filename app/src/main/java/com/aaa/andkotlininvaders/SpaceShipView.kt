@@ -9,25 +9,26 @@ import android.graphics.Picture
 import android.graphics.Rect
 import android.graphics.drawable.PictureDrawable
 import android.util.AttributeSet
-import android.util.Log
 import android.util.Range
 import android.view.MotionEvent
 import android.view.View
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import java.util.UUID
+import java.util.Timer
+import kotlin.concurrent.schedule
 import kotlin.math.roundToInt
 
-class SpaceShipView: View, RigidBodyObject {
+class SpaceShipView: View {
     /* Viewを継承するときのお約束 */
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
+    private var bursttimer: Timer? = null
     private var halfWidth = 0F
     private var halfHeight = 0F
     private var currentShipPosition: Float = 0F
@@ -35,6 +36,8 @@ class SpaceShipView: View, RigidBodyObject {
     private var bodyTopPoint = 0f
     private var wingWidth = 0F
     private var missileSize = 0F
+    private fun getShipX() = currentShipPosition
+    private fun getShipY(): Float = bodyTopPoint
     private var displayRect = Rect()
     private var mainBodyXRange = Range(0F, 0F)
     private var mainBodyYRange = Range(0F, 0F)
@@ -55,36 +58,18 @@ class SpaceShipView: View, RigidBodyObject {
         isAntiAlias = false
         isDither = false
     }
-
     private val bodyStrokePaint = Paint().apply {
         color = Color.parseColor("#DEDEDE")
         style = Paint.Style.STROKE
         isAntiAlias = false
         isDither = false
     }
-
     private val wingsPaintOutline = Paint().apply {
         color = Color.parseColor("#0069DE")
         style = Paint.Style.STROKE
         strokeWidth = 2F
         isAntiAlias = false
         isDither = false
-    }
-
-    var onCollisionCallBack: OnCollisionCallBack? = null
-        set(value) {
-            field = value
-            collisionDetector.onCollisionCallBack = value
-        }
-
-    override val collisionDetector: CollisionDetector = CollisionDetector(this)
-
-    override fun removeSoftBodyEntry(bullet: UUID) {
-        TODO("Not yet implemented")
-    }
-
-    override fun checkCollision(softBodyObjectData: SoftBodyObjectData) {
-        TODO("Not yet implemented")
     }
 
     /* ワーニング対応 onTouchEvent()をoverrideしたら、performClick()を呼ばんといかんらしい　*/
@@ -94,11 +79,20 @@ class SpaceShipView: View, RigidBodyObject {
 
         /* タッチイベント定義 */
         setOnTouchListener { _, motionEvent ->
-            Log.d("aaaaa", "aaaaa motionEvent=(${motionEvent.x},${motionEvent.action})")
             when(motionEvent.action) {
-                MotionEvent.ACTION_DOWN,
-                MotionEvent.ACTION_MOVE,
+                MotionEvent.ACTION_DOWN -> {
+                    bursttimer = Timer().apply { schedule(0, 200) { fire() } }
+                    setBackgroundColor(ContextCompat.getColor(context, R.color.burstFireOnColor))
+                    GameSceneViewModel.SpaceShipViewInfo.setXPos(motionEvent.x)
+                    return@setOnTouchListener true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    GameSceneViewModel.SpaceShipViewInfo.setXPos(motionEvent.x)
+                    return@setOnTouchListener true
+                }
                 MotionEvent.ACTION_UP -> {
+                    bursttimer?.cancel()
+                    setBackgroundColor(ContextCompat.getColor(context, R.color.burstFireOffColor))
                     GameSceneViewModel.SpaceShipViewInfo.setXPos(motionEvent.x)
                     return@setOnTouchListener true
                 }
@@ -124,8 +118,14 @@ class SpaceShipView: View, RigidBodyObject {
         }
     }
 
+    var fireSound: SoundManager? = null
+    private fun fire() {
+        fireSound?.play()
+//        GameSceneViewModel.BulletInfo.bulletList.add(Bullet(context, getShipX(), getShipY(), Sender.PLAYER))
+        GameSceneViewModel.BulletInfo.addBullet(Bullet(context, getShipX(), getShipY(), Sender.PLAYER))
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
-        Log.d("aaaaa", "aaaaa onSizeChanged() aaaaaaaaaa w,h=(${oldw},${oldh} -> ${w},${h}) (x,y)=(${x},${y})")
         super.onSizeChanged(w, h, oldw, oldh)
         halfWidth = w / 2F
         getDrawingRect(displayRect)
@@ -184,21 +184,17 @@ class SpaceShipView: View, RigidBodyObject {
     private fun drawMisc(canvas: Canvas) {
         var startY = halfHeight + bodyTopPoint
         var startX = halfWidth - wingWidth
-        canvas.drawMissile(startX, startY)
+        canvas.drawLine(startX, startY, startX, startY - missileSize, jetPaint)
 
         startX = halfWidth + wingWidth
-        canvas.drawMissile(startX, startY)
+        canvas.drawLine(startX, startY, startX, startY - missileSize, jetPaint)
 
         startX = (halfWidth - wingWidth / 2)
         startY = (halfHeight + bodyTopPoint / 3F)
-        canvas.drawMissile(startX, startY)
+        canvas.drawLine(startX, startY, startX, startY - missileSize, jetPaint)
 
         startX = (halfWidth + wingWidth / 2)
-        canvas.drawMissile(startX, startY)
-    }
-
-    private fun Canvas.drawMissile(startX: Float, startY: Float) {
-        drawLine(startX, startY, startX, startY - missileSize, jetPaint)
+        canvas.drawLine(startX, startY, startX, startY - missileSize, jetPaint)
     }
 
     private fun drawShipWings(canvas: Canvas) {
