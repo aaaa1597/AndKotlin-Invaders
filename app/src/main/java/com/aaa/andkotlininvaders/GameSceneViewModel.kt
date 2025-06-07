@@ -49,6 +49,8 @@ class GameSceneViewModel : ViewModel() {
     }
 
     object BulletInfo {
+        var bulletViewHeight: Int = 0
+        /* bulletListへの操作はすべてlock(排他制御)してから使う */
         private val lock = java.util.concurrent.locks.ReentrantLock()
         private val bulletList = mutableListOf<Bullet>()
         fun init() { lock.withLock { bulletList.clear() } }
@@ -79,13 +81,10 @@ class GameSceneViewModel : ViewModel() {
                 bulletList.removeAll { it.id == id }
             }
         }
-
         fun addBullet(bullet: Bullet) {
             lock.withLock {
                 bulletList.add(bullet)
             }
         }
-
-        var bulletViewHeight: Int = 0
     }
 }
