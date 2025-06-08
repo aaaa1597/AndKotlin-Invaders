@@ -81,7 +81,12 @@ class SpaceShipView: View {
         setOnTouchListener { _, motionEvent ->
             when(motionEvent.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    bursttimer = Timer().apply { schedule(0, 200) { fire() } }
+                    bursttimer = Timer().apply { schedule(0, 200) {
+                        if(GameSceneViewModel.BulletRemain.remainFlow.value > 0) {
+                            GameSceneViewModel.BulletRemain.decrement();
+                            fire()
+                        }
+                    }}
                     setBackgroundColor(ContextCompat.getColor(context, R.color.burstFireOnColor))
                     GameSceneViewModel.SpaceShipViewInfo.setXPos(motionEvent.x)
                     return@setOnTouchListener true

@@ -53,7 +53,7 @@ class Bullet(context: Context, private val bulletX: Float, initY: Float, private
     val id: UUID = UUID.randomUUID()
     var bulletY: Float = initY
     private val bulletSize = 40F
-    private val SPEED: Int = 200
+    private val SPEED: Int = 300
     private val updatetimer: Timer = Timer()
     private val bulletPaint = Paint().apply {
         color = if (sender == Sender.PLAYER) ResourcesCompat.getColor(context.resources, R.color.bulletColor,null)

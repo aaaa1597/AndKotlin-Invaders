@@ -23,6 +23,7 @@ class GameSceneViewModel : ViewModel() {
         const val MAX_REMAIN = 80
         private val _remainFlow =  MutableStateFlow(0)
         val remainFlow: StateFlow<Int> = _remainFlow
+        fun decrement() { _remainFlow.value-- }
         fun isRemainRed(): Boolean = ((remainFlow.value.toFloat()/MAX_REMAIN) < 0.25)
         fun init() { _remainFlow.value = MAX_REMAIN }
     }
