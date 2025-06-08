@@ -53,7 +53,7 @@ class Bullet(context: Context, private val bulletX: Float, initY: Float, private
     val id: UUID = UUID.randomUUID()
     var bulletY: Float = initY
     private val bulletSize = 40F
-    private val speed: Int = 10
+    private val SPEED: Int = 200
     private val updatetimer: Timer = Timer()
     private val bulletPaint = Paint().apply {
         color = if (sender == Sender.PLAYER) ResourcesCompat.getColor(context.resources, R.color.bulletColor,null)
@@ -83,12 +83,12 @@ class Bullet(context: Context, private val bulletX: Float, initY: Float, private
 
     private fun translate() {
         if (sender == Sender.PLAYER) {
-            bulletY -= speed
+            bulletY -= SPEED
             if (bulletY < 0)
                 GameSceneViewModel.BulletInfo.removeAllBullets(this.id)
         }
         else {
-            bulletY += speed
+            bulletY += SPEED
             if (bulletY > GameSceneViewModel.BulletInfo.bulletViewHeight)
                 GameSceneViewModel.BulletInfo.removeAllBullets(this.id)
         }
