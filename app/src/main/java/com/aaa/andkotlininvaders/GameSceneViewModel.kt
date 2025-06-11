@@ -18,6 +18,13 @@ class GameSceneViewModel : ViewModel() {
         BulletInfo.init()
     }
 
+    /* レベル */
+    object LevelInfo {
+        var level = 0
+        fun resetLevel() { level = 1 }
+        fun increment() = level++
+    }
+
     /* 残り弾薬数 */
     object BulletRemain {
         const val MAX_REMAIN = 80
@@ -42,6 +49,7 @@ class GameSceneViewModel : ViewModel() {
         fun onHit() { _playerLife.value -= 2 }
     }
 
+    /* 自機View情報 */
     object SpaceShipViewInfo {
         private val _xPos = MutableStateFlow(600f)
         val xPos: StateFlow<Float> = _xPos
@@ -49,6 +57,7 @@ class GameSceneViewModel : ViewModel() {
         fun setXPos(x: Float) { _xPos.value = x}
     }
 
+    /* 弾丸情報 */
     object BulletInfo {
         var bulletViewHeight: Int = 0
         /* bulletListへの操作はすべてlock(排他制御)してから使う */

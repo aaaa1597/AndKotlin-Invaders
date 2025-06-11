@@ -1,5 +1,6 @@
 package com.aaa.andkotlininvaders
 
+import android.animation.ObjectAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
@@ -126,7 +127,6 @@ class SpaceShipView: View {
     var fireSound: SoundManager? = null
     private fun fire() {
         fireSound?.play()
-//        GameSceneViewModel.BulletInfo.bulletList.add(Bullet(context, getShipX(), getShipY(), Sender.PLAYER))
         GameSceneViewModel.BulletInfo.addBullet(Bullet(context, getShipX(), getShipY(), Sender.PLAYER))
     }
 
@@ -143,6 +143,10 @@ class SpaceShipView: View {
         mainBodyYRange = Range(top + streamLinedTopPoint, (top + halfHeight + bodyTopPoint) - missileSize)
         wingsYRange = Range((top + halfHeight + bodyTopPoint) - missileSize, top + halfHeight + bodyTopPoint)
         initPicture()
+        ObjectAnimator.ofFloat(this, "translationY", h.toFloat(), 0f).apply {
+            duration = 1200
+            start()
+        }
     }
 
     private fun initPicture() {
