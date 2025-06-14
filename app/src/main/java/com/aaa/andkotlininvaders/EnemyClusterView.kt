@@ -34,16 +34,16 @@ class EnemyClusterView: View {
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
-    private val MAXROWSIZE: Int = 5
-    private val COLUMNSIZE = 6
     private var rowSize = 1
     private val enemyList = mutableListOf( EnemyColumn() )
     private var translateJob: Job = Job()
     private var firingJob: Job = Job()
-    private val vibratorAT by lazy { VibratorAantenna(context) }
+    private val vibratorAT by lazy { VibratorAntenna(context) }
     var fireSound: SoundManager? = null
     companion object {
-        var speed = 2F
+        const val SPEED = 2F
+        private const val MAXROWSIZE: Int = 5
+        private const val COLUMNSIZE = 6
     }
 
     init {
@@ -278,7 +278,7 @@ class CapitalShip : IEnemyShip {
         drawGuns(wingWidth, topHeight, canvas)
     }
 
-    private fun drawWingsAndBody(wingWidth: Float, topHeight: Float, canvas: Canvas,) {
+    private fun drawWingsAndBody(wingWidth: Float, topHeight: Float, canvas: Canvas) {
         val roundPartTopPoint = enemyY - (2 * topHeight)
         drawPath.moveTo(enemyX - topHeight, roundPartTopPoint)
         drawPath.quadTo(enemyX, enemyY - coreRadius, enemyX + topHeight, roundPartTopPoint)
@@ -299,7 +299,7 @@ class CapitalShip : IEnemyShip {
         canvas.drawPath(drawPath, paint)
     }
 
-    private fun drawGuns( wingWidth: Float, topHeight: Float, canvas: Canvas,) {
+    private fun drawGuns( wingWidth: Float, topHeight: Float, canvas: Canvas) {
         canvas.drawLine(enemyX - wingWidth, enemyY - topHeight, enemyX - coreRadius, enemyY - topHeight, strokePaint)
         canvas.drawLine(enemyX + wingWidth, enemyY - topHeight, enemyX + coreRadius, enemyY - topHeight,strokePaint)
 
@@ -308,8 +308,8 @@ class CapitalShip : IEnemyShip {
     }
 
     override fun translate(offset: Long) {
-        enemyY += EnemyClusterView.speed
-        drawRect.offset(0F, EnemyClusterView.speed)
+        enemyY += EnemyClusterView.SPEED
+        drawRect.offset(0F, EnemyClusterView.SPEED)
     }
 
     override fun setInitialSize(boxSize: Float, positionX: Int, positionY: Int) {
@@ -391,8 +391,8 @@ class AlienShip : IEnemyShip {
     }
 
     override fun translate(offset: Long) {
-        enemyY += EnemyClusterView.speed
-        drawRect.offset(0F, EnemyClusterView.speed)
+        enemyY += EnemyClusterView.SPEED
+        drawRect.offset(0F, EnemyClusterView.SPEED)
         rotationOffset = offset % 90F
     }
 
@@ -474,8 +474,8 @@ class TieFighter : IEnemyShip {
     }
 
     override fun translate(offset: Long) {
-        enemyY += EnemyClusterView.speed
-        drawRect.offset(0F, EnemyClusterView.speed)
+        enemyY += EnemyClusterView.SPEED
+        drawRect.offset(0F, EnemyClusterView.SPEED)
     }
 
     override fun setInitialSize(boxSize: Float, positionX: Int, positionY: Int) {
@@ -496,7 +496,7 @@ class TieFighter : IEnemyShip {
     override fun hitBoxRadius() = coreRadius
 }
 
-class VibratorAantenna(context: Context) {
+class VibratorAntenna(context: Context) {
     private var vibrator:  Vibrator = (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
     fun vibrate(time: Long, amplitude: Int = 255) {
         val effect = VibrationEffect.createOneShot(time, amplitude)
