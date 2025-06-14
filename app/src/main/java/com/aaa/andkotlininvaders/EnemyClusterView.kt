@@ -130,6 +130,13 @@ class EnemyClusterView: View {
     interface EnemyClusterViewEventCallback {
         fun onEnemyBreached()
     }
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        enemyList.flattenedForEach {
+            it.onDraw(canvas)
+        }
+    }
 }
 
 /*************************************/
@@ -187,6 +194,11 @@ class Enemy {
     fun onFireCanon(fireSound: SoundManager?, enemyX: Float, enemyY: Float) {
         fireSound?.play()
         GameSceneViewModel.BulletInfo.addBullet(Bullet(enemyX, enemyY, Sender.ENEMY))
+    }
+
+    fun onDraw(canvas: Canvas) {
+        if (isVisible)
+            enemyDelegate.onDraw(canvas)
     }
 
     companion object {
