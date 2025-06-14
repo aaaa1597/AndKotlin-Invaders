@@ -91,7 +91,7 @@ class EnemyClusterView: View {
                         if (enemyList.isNotEmpty()) {
                             val enemyList = enemyList.random()
                             val enemy = enemyList.enemyList.findLast { it.isVisible }
-                            enemy?.onFireCanon(enemy.enemyX, enemy.enemyY)
+                            enemy?.onFireCanon(fireSound, enemy.enemyX, enemy.enemyY)
                         }
                     }
                 }}
@@ -184,7 +184,8 @@ class Enemy {
     val hitBoxRadius: Float
         get() = enemyDelegate.hitBoxRadius()
 
-    fun onFireCanon(enemyX: Float, enemyY: Float) {
+    fun onFireCanon(fireSound: SoundManager?, enemyX: Float, enemyY: Float) {
+        fireSound?.play()
         GameSceneViewModel.BulletInfo.addBullet(Bullet(enemyX, enemyY, Sender.ENEMY))
     }
 
