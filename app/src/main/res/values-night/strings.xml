@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Space Invaders</string>
+    <string name="copyright">music : maoudamashii</string>
+    <string name="start_game">Start Game</string>
+    <string name="view_scores">View Scores</string>
+    <string name="exit">Exit</string>
+    <string name="high_score">High Score</string>
+    <string name="level">Level %1$d - %2$d</string>
+    <string name="title_countdown">Level %1$d Start</string>
+    <string name="countdown_startvalue">3</string>
+    <string name="str_copyright">music：maoudamashi</string>
+    <string name="score_tmpval">1234</string>
+    <string name="you_died">YOU DIED</string>
+</resources>

@@ -82,6 +82,7 @@ class SpaceShipView: View {
         setOnTouchListener { _, motionEvent ->
             when(motionEvent.action) {
                 MotionEvent.ACTION_DOWN -> {
+                    bursttimer?.cancel()    /* まれにUPが来ずにDOWNが来ることへの対策 */
                     bursttimer = Timer().apply { schedule(0, 200) {
                         if(GameSceneViewModel.BulletRemain.remainFlow.value > 0) {
                             GameSceneViewModel.BulletRemain.decrement();
@@ -107,21 +108,20 @@ class SpaceShipView: View {
         }
 
         /* 自機移動 */
-        findViewTreeLifecycleOwner()?.lifecycleScope?.launch {
-            findViewTreeLifecycleOwner()?.repeatOnLifecycle(Lifecycle.State.RESUMED) {
-                GameSceneViewModel.SpaceShipViewInfo.xPos.collect {
-                    if (it > wingWidth && it < measuredWidth - wingWidth) {
-                        currentShipPosition = it
-                        mainBodyXRange  = Range(currentShipPosition-24, currentShipPosition+24)
-                        leftWingsXRange = Range(currentShipPosition-wingWidth, mainBodyXRange.lower)
-                        rightWingsXRange= Range(mainBodyXRange.upper, currentShipPosition+wingWidth)
-                        displayRect.set((it-halfWidth).roundToInt(),0,
-                                        (it+halfWidth).roundToInt(), measuredHeight)
-                        invalidate()
-                    }
+        val lifecycleOwner = findViewTreeLifecycleOwner()!!
+        lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            GameSceneViewModel.SpaceShipViewInfo.xPos.collect {
+                if (it > wingWidth && it < measuredWidth - wingWidth) {
+                    currentShipPosition = it
+                    mainBodyXRange  = Range(currentShipPosition-24, currentShipPosition+24)
+                    leftWingsXRange = Range(currentShipPosition-wingWidth, mainBodyXRange.lower)
+                    rightWingsXRange= Range(mainBodyXRange.upper, currentShipPosition+wingWidth)
+                    displayRect.set((it-halfWidth).roundToInt(),0,
+                                    (it+halfWidth).roundToInt(), measuredHeight)
+                    invalidate()
                 }
             }
-        }
+        }}
     }
 
     var fireSound: SoundManager? = null

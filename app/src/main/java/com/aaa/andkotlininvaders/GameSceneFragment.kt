@@ -12,26 +12,31 @@ import android.view.animation.OvershootInterpolator
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
+import com.aaa.andkotlininvaders.EnemyClusterView.EnemyClusterViewEventCallback
 import com.aaa.andkotlininvaders.databinding.FragmentGameSceneBinding
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class GameSceneFragment : Fragment() {
     private lateinit var _binding: FragmentGameSceneBinding
     private val viewModel: GameSceneViewModel by viewModels()
+    private var scoreFlowJob: Job = Job()
+    private var remainFlowJob: Job = Job()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.init()
 
         /* 得点の監視処理 */
-        lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        scoreFlowJob = lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.RESUMED) {
             viewModel.scoreFlow.collect{
                 _binding.txtScore.text = it.toString()
             }
         }}
 
         /* 弾薬数の監視処理 */
-        lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        remainFlowJob = lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.RESUMED) {
             GameSceneViewModel.BulletRemain.remainFlow.collect {
                 /* 更新前保持 */
                 val preval: Int = _binding.txtBulletcounter.text.toString().toIntOrNull() ?: 0
@@ -73,14 +78,18 @@ class GameSceneFragment : Fragment() {
         val soundManager = SoundManager(requireContext())
         lifecycle.addObserver(soundManager)
         _binding.viwSpaceShipView.fireSound =soundManager
+        _binding.viwEnemyclusterview.setOnEnemyClusterViewEventCallback(object: EnemyClusterViewEventCallback {
+            override fun onEnemyBreached() {
+                /* ゲームオーバー画面に遷移 */
+                findNavController().navigate(R.id.action_to_youdeid_zoom)
+            }
+        })
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
-
-    override fun onPause() {
-        super.onPause()
+    override fun onDestroy() {
+        super.onDestroy()
+        scoreFlowJob.cancel()
+        remainFlowJob.cancel()
     }
 
     companion object {
