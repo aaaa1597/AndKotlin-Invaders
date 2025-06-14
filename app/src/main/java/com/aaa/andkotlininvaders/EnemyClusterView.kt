@@ -57,6 +57,7 @@ class EnemyClusterView: View {
         firingJob.cancel()
     }
 
+    @OptIn(ObsoleteCoroutinesApi::class)
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         initEnemies()
