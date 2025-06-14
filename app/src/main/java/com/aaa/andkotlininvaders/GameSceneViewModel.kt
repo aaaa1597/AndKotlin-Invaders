@@ -1,16 +1,29 @@
 package com.aaa.andkotlininvaders
 
+import android.app.Application
 import android.graphics.Canvas
-import androidx.lifecycle.ViewModel
+import android.graphics.Color
+import androidx.core.content.res.ResourcesCompat
+import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 import kotlin.concurrent.withLock
 
-class GameSceneViewModel : ViewModel() {
+class GameSceneViewModel(application: Application) : AndroidViewModel(application) {
+    private val _playerBulletColor= ResourcesCompat.getColor(getApplication<Application>().applicationContext.resources, R.color.bulletColor,null)
+    private val _enemyBulletColor = Color.RED
+
+    companion object {
+       var BULLET_PLAYERCOLOR:Int = 0
+       var BULLET_ENEMYCOLOR :Int = 0
+    }
+
     /* 全初期化 */
     fun init() {
+        BULLET_PLAYERCOLOR = _playerBulletColor
+        BULLET_ENEMYCOLOR  = _enemyBulletColor
         BulletRemain.init()
         _scoreFlow.value = 0
         LifeGaugeInfo.init()
@@ -27,7 +40,7 @@ class GameSceneViewModel : ViewModel() {
 
     /* 残り弾薬数 */
     object BulletRemain {
-        const val MAX_REMAIN = 80
+        private const val MAX_REMAIN = 80
         private val _remainFlow =  MutableStateFlow(0)
         val remainFlow: StateFlow<Int> = _remainFlow
         fun decrement() { _remainFlow.value-- }

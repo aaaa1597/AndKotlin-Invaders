@@ -77,7 +77,8 @@ class GameSceneFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val soundManager = SoundManager(requireContext())
         lifecycle.addObserver(soundManager)
-        _binding.viwSpaceShipView.fireSound =soundManager
+        _binding.viwSpaceShipView.fireSound   = soundManager
+        _binding.viwEnemyclusterview.fireSound= soundManager
         _binding.viwEnemyclusterview.setOnEnemyClusterViewEventCallback(object: EnemyClusterViewEventCallback {
             override fun onEnemyBreached() {
                 /* ゲームオーバー画面に遷移 */

@@ -2,11 +2,9 @@ package com.aaa.andkotlininvaders
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
-import androidx.core.content.res.ResourcesCompat
 import java.util.Timer
 import java.util.UUID
 import kotlin.concurrent.schedule
@@ -30,7 +28,7 @@ class BulletView: View {
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        GameSceneViewModel.BulletInfo.bulletViewHeight = h;
+        GameSceneViewModel.BulletInfo.bulletViewHeight = h
     }
     override fun hasOverlappingRendering(): Boolean = false
 
@@ -49,15 +47,15 @@ class BulletView: View {
 }
 
 enum class Sender { PLAYER, ENEMY}
-class Bullet(context: Context, private val bulletX: Float, initY: Float, private val sender: Sender) {
+class Bullet(private val bulletX: Float, initY: Float, private val sender: Sender) {
     val id: UUID = UUID.randomUUID()
     var bulletY: Float = initY
     private val bulletSize = 40F
     private val SPEED: Int = 300
     private val updatetimer: Timer = Timer()
     private val bulletPaint = Paint().apply {
-        color = if (sender == Sender.PLAYER) ResourcesCompat.getColor(context.resources, R.color.bulletColor,null)
-                else Color.RED
+        color = if (sender == Sender.PLAYER) GameSceneViewModel.BULLET_PLAYERCOLOR
+                else GameSceneViewModel.BULLET_ENEMYCOLOR
         isAntiAlias = false
         strokeWidth = 8F
         style = Paint.Style.STROKE

@@ -22,6 +22,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.aaa.andkotlininvaders.GlobalCounter.enemyTimerFlow
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ObsoleteCoroutinesApi
+import kotlinx.coroutines.channels.ticker
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlin.random.Random
 
@@ -38,6 +41,7 @@ class EnemyClusterView: View {
     private var translateJob: Job = Job()
     private var firingJob: Job = Job()
     private val vibratorAT by lazy { VibratorAantenna(context) }
+    var fireSound: SoundManager? = null
     companion object {
         var speed = 2F
     }
@@ -65,8 +69,8 @@ class EnemyClusterView: View {
             override fun onAnimationCancel(anim: Animator) {}
             override fun onAnimationRepeat(anim: Animator) {}
             override fun onAnimationEnd(anim: Animator) {
+                val lifecycleOwner = findViewTreeLifecycleOwner()!!
                 translateJob.cancel()
-                var lifecycleOwner = findViewTreeLifecycleOwner()!!
                 translateJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     enemyTimerFlow.collect {
                         enemyList.checkIfYReached(measuredHeight) { breachedMax ->
@@ -76,6 +80,17 @@ class EnemyClusterView: View {
                                 translateEnemy(System.currentTimeMillis())
                                 invalidate()
                             }
+                        }
+                    }
+                }}
+
+                firingJob.cancel()
+                firingJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    ticker(1000, 200).receiveAsFlow().collect {
+                        if (enemyList.isNotEmpty()) {
+                            val enemyList = enemyList.random()
+                            val enemy = enemyList.enemyList.findLast { it.isVisible }
+                            enemy?.onFireCanon(enemy.enemyX, enemy.enemyY)
                         }
                     }
                 }}
@@ -167,6 +182,10 @@ class Enemy {
 
     val hitBoxRadius: Float
         get() = enemyDelegate.hitBoxRadius()
+
+    fun onFireCanon(enemyX: Float, enemyY: Float) {
+        GameSceneViewModel.BulletInfo.addBullet(Bullet(enemyX, enemyY, Sender.ENEMY))
+    }
 
     companion object {
         fun builder(columnSize: Int, width: Int, positionX: Int, positionY: Int): Enemy {

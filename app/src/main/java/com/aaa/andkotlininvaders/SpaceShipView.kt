@@ -130,7 +130,7 @@ class SpaceShipView: View {
     var fireSound: SoundManager? = null
     private fun fire() {
         fireSound?.play()
-        GameSceneViewModel.BulletInfo.addBullet(Bullet(context, getShipX(), getShipY(), Sender.PLAYER))
+        GameSceneViewModel.BulletInfo.addBullet(Bullet(getShipX(), getShipY(), Sender.PLAYER))
     }
 
     override fun onDetachedFromWindow() {
