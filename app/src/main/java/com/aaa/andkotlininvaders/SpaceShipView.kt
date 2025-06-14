@@ -18,6 +18,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -45,6 +46,7 @@ class SpaceShipView: View {
     private var leftWingsXRange = Range(0F, 0F)
     private var rightWingsXRange = Range(0F, 0F)
     private var wingsYRange = Range(0F, 0F)
+    private var spaceShipxPos: Job = Job()
     private lateinit var spaceShipPicture: Picture
     private lateinit var pictureDrawable: PictureDrawable
     private val jetPaint = Paint().apply {
@@ -85,7 +87,7 @@ class SpaceShipView: View {
                     bursttimer?.cancel()    /* まれにUPが来ずにDOWNが来ることへの対策 */
                     bursttimer = Timer().apply { schedule(0, 200) {
                         if(GameSceneViewModel.BulletRemain.remainFlow.value > 0) {
-                            GameSceneViewModel.BulletRemain.decrement();
+                            GameSceneViewModel.BulletRemain.decrement()
                             fire()
                         }
                     }}
@@ -108,8 +110,9 @@ class SpaceShipView: View {
         }
 
         /* 自機移動 */
+        spaceShipxPos.cancel()
         val lifecycleOwner = findViewTreeLifecycleOwner()!!
-        lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        spaceShipxPos = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             GameSceneViewModel.SpaceShipViewInfo.xPos.collect {
                 if (it > wingWidth && it < measuredWidth - wingWidth) {
                     currentShipPosition = it
@@ -128,6 +131,11 @@ class SpaceShipView: View {
     private fun fire() {
         fireSound?.play()
         GameSceneViewModel.BulletInfo.addBullet(Bullet(context, getShipX(), getShipY(), Sender.PLAYER))
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        spaceShipxPos.cancel()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

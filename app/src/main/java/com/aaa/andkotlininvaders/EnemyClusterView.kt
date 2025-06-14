@@ -10,6 +10,9 @@ import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.RectF
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.util.AttributeSet
 import android.util.Range
 import android.view.View
@@ -34,6 +37,7 @@ class EnemyClusterView: View {
     private val enemyList = mutableListOf( EnemyColumn() )
     private var translateJob: Job = Job()
     private var firingJob: Job = Job()
+    private val vibratorAT by lazy { VibratorAantenna(context) }
     companion object {
         var speed = 2F
     }
@@ -62,21 +66,19 @@ class EnemyClusterView: View {
             override fun onAnimationRepeat(anim: Animator) {}
             override fun onAnimationEnd(anim: Animator) {
                 translateJob.cancel()
-                translateJob = findViewTreeLifecycleOwner()?.lifecycleScope!!.launch {
-                    findViewTreeLifecycleOwner()?.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                        enemyTimerFlow.collect {
-                            enemyList.checkIfYReached(measuredHeight) { hasReachedMax ->
-                                if (hasReachedMax) {
-                                    resetEnemies()
-                                }
-                                if (enemyList.isNotEmpty()) {
-                                    translateEnemy(System.currentTimeMillis())
-                                    invalidate()
-                                }
+                var lifecycleOwner = findViewTreeLifecycleOwner()!!
+                translateJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    enemyTimerFlow.collect {
+                        enemyList.checkIfYReached(measuredHeight) { breachedMax ->
+                            if (breachedMax)
+                                baseLost()
+                            if (enemyList.isNotEmpty()) {
+                                translateEnemy(System.currentTimeMillis())
+                                invalidate()
                             }
                         }
                     }
-                }
+                }}
             }
         })
     }
@@ -85,19 +87,17 @@ class EnemyClusterView: View {
         enemyList.clear()
         repeat(COLUMNSIZE) { x ->
             val enemiesList = MutableList(rowSize) { y ->
-                Enemy.builder(COLUMNSIZE, measuredWidth, x, y)
-            }
+                                Enemy.builder(COLUMNSIZE, measuredWidth, x, y)
+                              }
             val range = enemiesList.getRangeX()
-            enemyList.add(
-                EnemyColumn(Range<Float>(range.first, range.second), enemiesList)
-            )
+            enemyList.add(EnemyColumn(Range<Float>(range.first, range.second), enemiesList))
         }
     }
 
-    private fun resetEnemies() {
+    private fun baseLost() {
         enemyList.clear()
         enemyDetailsCallback?.onEnemyBreached()
-//        hapticService.performHapticFeedback(320)
+        vibratorAT.vibrate(320)
         postInvalidate()
     }
 
@@ -461,4 +461,12 @@ class TieFighter : IEnemyShip {
     override fun getPositionX() = enemyX
     override fun getPositionY() = enemyX
     override fun hitBoxRadius() = coreRadius
+}
+
+class VibratorAantenna(context: Context) {
+    private var vibrator:  Vibrator = (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+    fun vibrate(time: Long, amplitude: Int = 255) {
+        val effect = VibrationEffect.createOneShot(time, amplitude)
+        vibrator.vibrate(effect)
+    }
 }
