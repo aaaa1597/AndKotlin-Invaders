@@ -233,6 +233,7 @@ class Enemy(private var fireSound: SoundManager?) {
 
             findedEnemy?.let { enemy ->
                 destroyEnemy(enemy)
+                GameSceneViewModel.BulletInfo.removeAllBullets(id)
                 val anyVisible = GameSceneViewModel.EnemyInfo.enemiesLines.any {
                                     it.areAnyVisible()
                                 }
@@ -244,9 +245,6 @@ class Enemy(private var fireSound: SoundManager?) {
                 }
             }
         }
-
-        /* 衝突した弾丸は消去 */
-        GameSceneViewModel.BulletInfo.removeAllBullets(id)
     }
 
     private fun checkEnemyYPosition(bulletY: Float): Boolean {
