@@ -59,10 +59,24 @@
             app:popExitAnim="@anim/nav_zoom_pop_exit_anim"
             app:popUpTo="@id/mainMenuFragment"
             app:popUpToInclusive="false" />
+        <action
+            android:id="@+id/action_to_gamecleared_zoom"
+            app:destination="@id/gameClearedFragment"
+            app:enterAnim="@anim/nav_zoom_enter_anim"
+            app:exitAnim="@anim/nav_zoom_exit_anim"
+            app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
+            app:popExitAnim="@anim/nav_zoom_pop_exit_anim"
+            app:popUpTo="@id/mainMenuFragment"
+            app:popUpToInclusive="false"/>
     </fragment>
     <fragment
         android:id="@+id/youDiedFragment"
         android:name="com.aaa.andkotlininvaders.YouDiedFragment"
         android:label="fragment_game_over"
         tools:layout="@layout/fragment_you_died" />
+    <fragment
+        android:id="@+id/gameClearedFragment"
+        android:name="com.aaa.andkotlininvaders.GameClearedFragment"
+        android:label="fragment_game_cleared"
+        tools:layout="@layout/fragment_game_cleared" />
 </navigation>

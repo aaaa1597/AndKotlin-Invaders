@@ -1,8 +1,11 @@
 package com.aaa.andkotlininvaders
 
+import android.content.Context
 import android.graphics.Color
 import androidx.fragment.app.viewModels
 import android.os.Bundle
+import android.os.VibratorManager
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -30,7 +33,7 @@ class GameSceneFragment : Fragment() {
 
         /* 得点の監視処理 */
         scoreFlowJob = lifecycleScope.launch { repeatOnLifecycle(Lifecycle.State.RESUMED) {
-            viewModel.scoreFlow.collect{
+            GameSceneViewModel.Score.scoreFlow.collect{
                 _binding.txtScore.text = it.toString()
             }
         }}

@@ -11,4 +11,5 @@
     <string name="str_copyright">音楽：魔王魂</string>
     <string name="score_tmpval">1234</string>
     <string name="you_died">YOU DIED</string>
+    <string name="level_complete">Level %1$d\nComplete</string>
 </resources>

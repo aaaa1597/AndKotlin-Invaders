@@ -21,6 +21,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Timer
+import java.util.UUID
 import kotlin.concurrent.schedule
 import kotlin.math.roundToInt
 
@@ -127,12 +128,6 @@ class SpaceShipView: View {
         }}
     }
 
-    var fireSound: SoundManager? = null
-    private fun fire() {
-        fireSound?.play()
-        GameSceneViewModel.BulletInfo.addBullet(Bullet(getShipX(), getShipY(), Sender.PLAYER))
-    }
-
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         spaceShipxPos.cancel()
@@ -173,7 +168,6 @@ class SpaceShipView: View {
 
         postInvalidate()
     }
-
     private fun drawExhaust(canvas: Canvas) {
         val topPoint = halfHeight + streamLinedTopPoint / 2
         val path = Path()
@@ -187,17 +181,14 @@ class SpaceShipView: View {
         path.close()
         canvas.drawPath(path, jetPaint)
     }
-
     private fun drawStreamlinedBody(it: Canvas) {
         bodyStrokePaint.strokeWidth = 10F
         it.drawLine(halfWidth, streamLinedTopPoint, halfWidth,measuredHeight - streamLinedTopPoint, bodyStrokePaint)
     }
-
     private fun drawBody(it: Canvas) {
         bodyStrokePaint.strokeWidth = 24F
         it.drawLine(halfWidth,bodyTopPoint,halfWidth,measuredHeight - bodyTopPoint,bodyStrokePaint)
     }
-
     private fun drawMisc(canvas: Canvas) {
         var startY = halfHeight + bodyTopPoint
         var startX = halfWidth - wingWidth
@@ -213,7 +204,6 @@ class SpaceShipView: View {
         startX = (halfWidth + wingWidth / 2)
         canvas.drawLine(startX, startY, startX, startY - missileSize, jetPaint)
     }
-
     private fun drawShipWings(canvas: Canvas) {
         val path = Path()
         path.moveTo(halfWidth, halfHeight - bodyTopPoint / 3) // Top
@@ -229,5 +219,38 @@ class SpaceShipView: View {
         super.onDraw(canvas)
         pictureDrawable.bounds = displayRect
         pictureDrawable.draw(canvas)
+    }
+
+    var fireSound: SoundManager? = null
+    private fun fire() {
+        fireSound?.play()
+        GameSceneViewModel.BulletInfo.addBullet(Bullet(getShipX(), getShipY(), Sender.PLAYER, ::checkCollision))
+    }
+
+    private fun checkCollision(id: UUID, bulletX: Float, bulletY: Float) {
+        /* YがSpaceShipに未達 */
+        if (bulletY.roundToInt() > top)
+            return
+
+        /* YがSpaceShipに到達, XもSpaceShip本体に衝突 */
+        if (mainBodyYRange.contains(bulletY) && mainBodyXRange.contains(bulletX))
+            onPlayerHit()
+        /* YがSpaceShipに到達, XもSpaceShip左ウイングに衝突 */
+        else if (wingsYRange.contains(bulletY) && leftWingsXRange.contains(bulletX))
+            onPlayerHit()
+        /* YがSpaceShipに到達, XもSpaceShip右ウイングに衝突 */
+        else if (wingsYRange.contains(bulletY) && rightWingsXRange.contains(bulletX))
+            onPlayerHit()
+        else
+            return; /* 衝突してない */
+
+        /* 衝突した弾丸は消去 */
+        GameSceneViewModel.BulletInfo.removeAllBullets(id)
+    }
+
+    private fun onPlayerHit() {
+        GameSceneViewModel.Shake.onHit()
+        GameSceneViewModel.LifeGaugeInfo.onHit()
+        GameSceneViewModel.Vibrator.vibrate(64, 48)
     }
 }

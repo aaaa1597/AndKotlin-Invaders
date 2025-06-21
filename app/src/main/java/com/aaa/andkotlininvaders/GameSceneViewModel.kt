@@ -1,31 +1,45 @@
 package com.aaa.andkotlininvaders
 
 import android.app.Application
+import android.bluetooth.BluetoothLeAudio
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
+import android.os.VibrationEffect
+import android.os.VibratorManager
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.application
+import com.aaa.andkotlininvaders.GameSceneViewModel.BulletInfo.bulletList
+import com.aaa.andkotlininvaders.GameSceneViewModel.BulletInfo.lock
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.UUID
 import kotlin.concurrent.withLock
 
 class GameSceneViewModel(application: Application) : AndroidViewModel(application) {
-    private val _playerBulletColor= ResourcesCompat.getColor(getApplication<Application>().applicationContext.resources, R.color.bulletColor,null)
-    private val _enemyBulletColor = Color.RED
-
     companion object {
-       var BULLET_PLAYERCOLOR:Int = 0
-       var BULLET_ENEMYCOLOR :Int = 0
+        var COLOR_BULLET_PLAYER:Int = 0
+        var COLOR_BULLET_ENEMY :Int = 0
+        var COLOR_AMMO_DROP :Int = 0
+        var COLOR_AMMO_MIDCIRCLE :Int = 0
+        private lateinit var vibrator: android.os.Vibrator
     }
 
     /* 全初期化 */
     fun init() {
-        BULLET_PLAYERCOLOR = _playerBulletColor
-        BULLET_ENEMYCOLOR  = _enemyBulletColor
+        COLOR_BULLET_PLAYER = ResourcesCompat.getColor(getApplication<Application>().resources, R.color.bulletColor,null)
+        COLOR_BULLET_ENEMY  = Color.RED
+        COLOR_AMMO_DROP     = ResourcesCompat.getColor(getApplication<Application>().resources, R.color.primaryFontColor,null)
+        COLOR_AMMO_MIDCIRCLE= ResourcesCompat.getColor(getApplication<Application>().resources, R.color.shipHighLightColor, null)
+        vibrator = (getApplication<Application>().getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
         BulletRemain.init()
-        _scoreFlow.value = 0
+        Score.init()
         LifeGaugeInfo.init()
         SpaceShipViewInfo.init()
         BulletInfo.init()
@@ -49,8 +63,14 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     /* 得点 */
-    private val _scoreFlow: MutableStateFlow<Int> = MutableStateFlow(0)
-    val scoreFlow: StateFlow<Int> = _scoreFlow
+    object Score {
+        private val _scoreFlow: MutableStateFlow<Long> = MutableStateFlow(0L)
+        val scoreFlow: StateFlow<Long> = _scoreFlow
+        fun init() { _scoreFlow.value = 0 }
+        fun updateScore(points: Long) {
+            _scoreFlow.value += points
+        }
+    }
 
     /* HP情報 */
     object LifeGaugeInfo {
@@ -77,7 +97,6 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         private val lock = java.util.concurrent.locks.ReentrantLock()
         private val bulletList = mutableListOf<Bullet>()
         fun init() { lock.withLock { bulletList.clear() } }
-        fun removeallBullets() { lock.withLock { bulletList.clear() } }
         fun drawBullets(canvas: Canvas) {
             lock.withLock {
                 bulletList.forEachSafe {
@@ -88,7 +107,7 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         fun cleanupBullets(measuredHeight: Int) {
             lock.withLock {
                 bulletList.forEachMutableSafe { bullet, iterator ->
-                    if (bullet.bulletY < 0 && bullet.bulletY > measuredHeight) {
+                    if (bullet.bulletY < 0 || bullet.bulletY > measuredHeight) {
                         iterator.remove()
                     }
                 }
@@ -108,6 +127,52 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
             lock.withLock {
                 bulletList.add(bullet)
             }
+        }
+    }
+
+    /* 敵機情報 */
+    object EnemyInfo {
+        val enemiesLines = mutableListOf( EnemyColumn() )
+        private val _enemiesEliminated = MutableStateFlow(0)
+        val enemiesEliminated = _enemiesEliminated.asStateFlow()
+        fun enemiesAllEliminated() {
+            _enemiesEliminated.value = 1
+        }
+    }
+
+    object AmmoInfo {
+        var dropViewHeight: Int = 0
+        private val _lock = java.util.concurrent.locks.ReentrantLock()
+        private val ammoList = mutableListOf<Ammo>()
+        fun cleanupAmmos() {
+            _lock.withLock {
+                ammoList.forEachMutableSafe { ammo, iterator ->
+                    if (ammo.bulletY < 0)
+                        iterator.remove()
+                }
+            }
+        }
+        fun drawAmmo(canvas: Canvas) {
+            _lock.withLock {
+                ammoList.forEachSafe {
+                        bullet,_ -> bullet.drawAmmo(canvas)
+                }
+            }
+        }
+    }
+
+    /* 画面振動 */
+    object Shake {
+        private val _shakeFlg =  MutableStateFlow("")
+        val shakeFlg: SharedFlow<String> = _shakeFlg.asStateFlow()
+        fun onHit() { _shakeFlg.value = "痛っ!!" }
+   }
+
+    /* 振動子 */
+    object Vibrator {
+        fun vibrate(time: Long, amplitude: Int = 255) {
+            val effect = VibrationEffect.createOneShot(time, amplitude)
+            vibrator.vibrate(effect)
         }
     }
 }

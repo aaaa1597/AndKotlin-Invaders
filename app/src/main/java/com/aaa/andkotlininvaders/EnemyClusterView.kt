@@ -10,22 +10,24 @@ import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.RectF
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.util.AttributeSet
+import android.util.Log
 import android.util.Range
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
+import androidx.navigation.fragment.findNavController
 import com.aaa.andkotlininvaders.GlobalCounter.enemyTimerFlow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import java.util.UUID
 import kotlin.random.Random
 
 class EnemyClusterView: View {
@@ -35,10 +37,9 @@ class EnemyClusterView: View {
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr)
 
     private var rowSize = 1
-    private val enemyList = mutableListOf( EnemyColumn() )
     private var translateJob: Job = Job()
     private var firingJob: Job = Job()
-    private val vibratorAT by lazy { VibratorAntenna(context) }
+    private var gameclearJob: Job = Job()
     var fireSound: SoundManager? = null
     companion object {
         const val SPEED = 2F
@@ -55,12 +56,13 @@ class EnemyClusterView: View {
         super.onDetachedFromWindow()
         translateJob.cancel()
         firingJob.cancel()
+        gameclearJob.cancel()
     }
 
     @OptIn(ObsoleteCoroutinesApi::class)
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        initEnemies()
+        initEnemies(fireSound)
         ObjectAnimator.ofFloat(this, "translationY", (-h).toFloat(), 0f).apply {
             duration = 2200
             start()
@@ -74,6 +76,7 @@ class EnemyClusterView: View {
                 translateJob.cancel()
                 translateJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     enemyTimerFlow.collect {
+                        val enemyList = GameSceneViewModel.EnemyInfo.enemiesLines
                         enemyList.checkIfYReached(measuredHeight) { breachedMax ->
                             if (breachedMax)
                                 baseLost()
@@ -88,37 +91,48 @@ class EnemyClusterView: View {
                 firingJob.cancel()
                 firingJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     ticker(1000, 200).receiveAsFlow().collect {
+                        val enemyList = GameSceneViewModel.EnemyInfo.enemiesLines
                         if (enemyList.isNotEmpty()) {
-                            val enemyList = enemyList.random()
-                            val enemy = enemyList.enemyList.findLast { it.isVisible }
-                            enemy?.onFireCanon(fireSound, enemy.enemyX, enemy.enemyY)
+                            val enemyLine = enemyList.random()
+                            val enemy = enemyLine.enemyList.findLast { it.isVisible }
+                            enemy?.onFireCanon(enemy.enemyX, enemy.enemyY)
                         }
+                    }
+                }}
+
+                gameclearJob.cancel()
+                gameclearJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    GameSceneViewModel.EnemyInfo.enemiesEliminated.collect {
+                        if(it == 0) return@collect
+                        findNavController().navigate(R.id.action_to_gamecleared_zoom)
                     }
                 }}
             }
         })
     }
 
-    private fun initEnemies() {
-        enemyList.clear()
+    private fun initEnemies(fireSound: SoundManager?) {
+        GameSceneViewModel.EnemyInfo.enemiesLines.clear()
         repeat(COLUMNSIZE) { x ->
             val enemiesList = MutableList(rowSize) { y ->
-                                Enemy.builder(COLUMNSIZE, measuredWidth, x, y)
+                                Enemy.builder(fireSound, COLUMNSIZE, measuredWidth, x, y)
                               }
             val range = enemiesList.getRangeX()
-            enemyList.add(EnemyColumn(Range<Float>(range.first, range.second), enemiesList))
+            val enemyList = GameSceneViewModel.EnemyInfo.enemiesLines
+            enemyList.add(EnemyColumn(Range(range.first, range.second), enemiesList))
         }
     }
 
     private fun baseLost() {
-        enemyList.clear()
+        GameSceneViewModel.EnemyInfo.enemiesLines.clear()
         enemyDetailsCallback?.onEnemyBreached()
-        vibratorAT.vibrate(320)
+        GameSceneViewModel.Vibrator.vibrate(320)
         postInvalidate()
     }
 
     private fun translateEnemy(millisUntilFinished: Long) {
-        enemyList.flattenedForEach { enemy ->
+        val enemiesLines = GameSceneViewModel.EnemyInfo.enemiesLines
+        enemiesLines.flattenedForEach { enemy ->
             enemy.translate(millisUntilFinished)
         }
     }
@@ -133,7 +147,8 @@ class EnemyClusterView: View {
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        enemyList.flattenedForEach {
+        val enemiesLines = GameSceneViewModel.EnemyInfo.enemiesLines
+        enemiesLines.flattenedForEach {
             it.onDraw(canvas)
         }
     }
@@ -169,12 +184,25 @@ fun List<Enemy>.getRangeX(): Pair<Float, Float> {
             }
 }
 
+inline fun List<EnemyColumn>.checkXForEach(x: Float, checkCollision: (EnemyColumn) -> Unit) {
+    val iterator = iterator()
+    while (iterator.hasNext()) {
+        val enemyColumn = iterator.next()
+        if (enemyColumn.range.contains(x) && enemyColumn.areAnyVisible()) {
+            checkCollision(enemyColumn)
+            return
+        }
+    }
+}
+
 /************************************************/
 /* EnemyClusterView ◇--- EnemyColumn ◇--- Enemy */
 /************************************************/
-class Enemy {
+class Enemy(private var fireSound: SoundManager?) {
     var isVisible: Boolean = true
     var enemyLife = Random.nextInt(1, 4)
+    private val points = enemyLife * 25L
+    private val hasDrops: Boolean = (Random.nextDouble(0.0, 1.0) > 0.8)
     val enemyDelegate: IEnemyShip by lazy {
         when (enemyLife) {
             1 -> CapitalShip()
@@ -191,9 +219,62 @@ class Enemy {
     val hitBoxRadius: Float
         get() = enemyDelegate.hitBoxRadius()
 
-    fun onFireCanon(fireSound: SoundManager?, enemyX: Float, enemyY: Float) {
+    fun onFireCanon(enemyX: Float, enemyY: Float) {
         fireSound?.play()
-        GameSceneViewModel.BulletInfo.addBullet(Bullet(enemyX, enemyY, Sender.ENEMY))
+        GameSceneViewModel.BulletInfo.addBullet(Bullet(enemyX, enemyY, Sender.ENEMY, ::checkCollision))
+    }
+
+    private fun checkCollision(id: UUID, bulletX: Float, bulletY: Float) {
+        val enemiesLines = GameSceneViewModel.EnemyInfo.enemiesLines
+        enemiesLines.checkXForEach(bulletX) {            /* ここでX座標コリジョンをチェック */
+            val findedEnemy = it.enemyList.reversed().find { enemy ->
+                                enemy.checkEnemyYPosition(bulletY)     /* ここでY座標コリジョンをチェック */
+                              }
+
+            findedEnemy?.let { enemy ->
+                destroyEnemy(enemy)
+                val anyVisible = GameSceneViewModel.EnemyInfo.enemiesLines.any {
+                                    it.areAnyVisible()
+                                }
+                /* 敵機全排除 → クリア */
+                if (!anyVisible) {
+                    GameSceneViewModel.Vibrator.vibrate(320)
+                    /* 完了後、ゲーム画面に遷移 */
+                    GameSceneViewModel.EnemyInfo.enemiesAllEliminated()
+                }
+            }
+        }
+
+        /* 衝突した弾丸は消去 */
+        GameSceneViewModel.BulletInfo.removeAllBullets(id)
+    }
+
+    private fun checkEnemyYPosition(bulletY: Float): Boolean {
+        return Range(enemyDelegate.getPositionY() - enemyDelegate.hitBoxRadius(),
+            enemyDelegate.getPositionY() + enemyDelegate.hitBoxRadius()).contains(bulletY) && isVisible
+    }
+
+    private fun destroyEnemy(destroyEnemy: Enemy) {
+        destroyEnemy.onHit()
+        fireSound?.play()
+        GameSceneViewModel.Vibrator.vibrate(64, 48)
+        dropAmmoIfItHave(destroyEnemy)
+    }
+
+    fun onHit() {
+        enemyLife--
+        if (enemyLife <= 0)
+            GameSceneViewModel.Score.updateScore(points)
+        enemyDelegate.onHit(enemyLife)
+        isVisible = enemyLife > 0
+    }
+
+    private var ammoDropsList = mutableListOf<Ammo>()
+    private fun dropAmmoIfItHave(enemy: Enemy) {
+        if(!enemy.hasDrops) return
+        if(enemy.enemyLife != 0) return
+        if(GameSceneViewModel.LevelInfo.level == 0) return
+        ammoDropsList.add(Ammo(enemy.enemyX, enemy.enemyY, ::checkCollision))
     }
 
     fun onDraw(canvas: Canvas) {
@@ -202,8 +283,8 @@ class Enemy {
     }
 
     companion object {
-        fun builder(columnSize: Int, width: Int, positionX: Int, positionY: Int): Enemy {
-            return Enemy().apply {
+        fun builder(fireSound: SoundManager?, columnSize: Int, width: Int, positionX: Int, positionY: Int): Enemy {
+            return Enemy(fireSound).apply {
                 val boxSize = width / columnSize.toFloat()
                 enemyDelegate.setInitialSize(boxSize, positionX, positionY)
             }
@@ -494,12 +575,4 @@ class TieFighter : IEnemyShip {
     override fun getPositionX() = enemyX
     override fun getPositionY() = enemyX
     override fun hitBoxRadius() = coreRadius
-}
-
-class VibratorAntenna(context: Context) {
-    private var vibrator:  Vibrator = (context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
-    fun vibrate(time: Long, amplitude: Int = 255) {
-        val effect = VibrationEffect.createOneShot(time, amplitude)
-        vibrator.vibrate(effect)
-    }
 }

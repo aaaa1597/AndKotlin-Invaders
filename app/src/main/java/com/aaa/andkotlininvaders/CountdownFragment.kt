@@ -6,12 +6,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import com.aaa.andkotlininvaders.databinding.FragmentCountdownBinding
-import com.aaa.andkotlininvaders.databinding.FragmentMainMenuBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
