@@ -11,7 +11,6 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.Log
 import android.util.Range
 import android.view.View
 import androidx.lifecycle.Lifecycle
@@ -19,8 +18,6 @@ import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
-import androidx.navigation.fragment.findNavController
 import com.aaa.andkotlininvaders.GlobalCounter.enemyTimerFlow
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
@@ -224,7 +221,7 @@ class Enemy(private var fireSound: SoundManager?) {
         GameSceneViewModel.BulletInfo.addBullet(Bullet(enemyX, enemyY, Sender.ENEMY, ::checkCollision))
     }
 
-    private fun checkCollision(id: UUID, bulletX: Float, bulletY: Float) {
+    private fun checkCollision(id: UUID, sender: Sender, bulletX: Float, bulletY: Float) {
         val enemiesLines = GameSceneViewModel.EnemyInfo.enemiesLines
         enemiesLines.checkXForEach(bulletX) {            /* ここでX座標コリジョンをチェック */
             val findedEnemy = it.enemyList.reversed().find { enemy ->
@@ -267,12 +264,11 @@ class Enemy(private var fireSound: SoundManager?) {
         isVisible = enemyLife > 0
     }
 
-    private var ammoDropsList = mutableListOf<Ammo>()
     private fun dropAmmoIfItHave(enemy: Enemy) {
         if(!enemy.hasDrops) return
         if(enemy.enemyLife != 0) return
         if(GameSceneViewModel.LevelInfo.level == 0) return
-        ammoDropsList.add(Ammo(enemy.enemyX, enemy.enemyY, ::checkCollision))
+        GameSceneViewModel.AmmoInfo.addAmmo(Ammo(enemy.enemyX, enemy.enemyY))
     }
 
     fun onDraw(canvas: Canvas) {

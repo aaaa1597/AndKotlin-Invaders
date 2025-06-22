@@ -38,12 +38,11 @@ class DropsView: View {
     }
 }
 
-class Ammo(private val bulletX: Float, shipY: Float, aCheckCollisionCallback: (id: UUID, bulletX: Float, bulletY: Float) -> Unit) {
+class Ammo(private val ammoX: Float, shipY: Float) {
     val id: UUID = UUID.randomUUID()
-    var bulletY: Float = shipY
+    var ammoY: Float = shipY
     val SPEED: Int = 6
     private val updatetimer: Timer = Timer()
-    val checkCollisionCallback: (id: UUID, bulletX: Float, bulletY: Float) -> Unit = aCheckCollisionCallback
     private val ammoPaint = Paint().apply {
         color = GameSceneViewModel.COLOR_AMMO_DROP
         isAntiAlias = false
@@ -62,26 +61,27 @@ class Ammo(private val bulletX: Float, shipY: Float, aCheckCollisionCallback: (i
     private val capsuleLength = GameSceneViewModel.AmmoInfo.dropViewHeight * 0.02F
     private val capsuleLHeight= GameSceneViewModel.AmmoInfo.dropViewHeight * 0.01F
 
-    private val drawRect = RectF(bulletX - capsuleLength, shipY - capsuleLHeight,
-        bulletX + capsuleLength, shipY + capsuleLHeight)
+    private val drawRect = RectF(ammoX - capsuleLength, shipY - capsuleLHeight,
+                                 ammoX + capsuleLength, shipY + capsuleLHeight)
 
     init {
         /* Bulletは(BulletView同様)、自発的に(200msタイマで)位置更新&コリジョン判定をする */
         updatetimer.schedule(0, 200) {
             translate()
-            checkCollisionCallback(id, bulletX, bulletY)
+            GameSceneViewModel.AmmoInfo.reqCollisionCheck(id, ammoX, ammoY)
         }
     }
 
     private fun translate() {
         drawRect.top += SPEED.toFloat()
         drawRect.bottom += SPEED.toFloat()
+        ammoY = drawRect.bottom
     }
 
     fun drawAmmo(canvas: Canvas) {
-        if(bulletY < 0) return
-        if(GameSceneViewModel.AmmoInfo.dropViewHeight < bulletY) return
+        if(ammoY < 0) return
+        if(GameSceneViewModel.AmmoInfo.dropViewHeight < ammoY) return
         canvas.drawRoundRect(drawRect, capsuleLHeight, capsuleLHeight, ammoPaint)
-        canvas.drawCircle(bulletX, bulletY, capsuleLHeight / 2, midCirclePaint)
+        canvas.drawCircle(ammoX, ammoY, capsuleLHeight / 2, midCirclePaint)
     }
 }

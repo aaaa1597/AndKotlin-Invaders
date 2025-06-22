@@ -1,20 +1,14 @@
 package com.aaa.andkotlininvaders
 
 import android.app.Application
-import android.bluetooth.BluetoothLeAudio
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.os.VibrationEffect
 import android.os.VibratorManager
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.application
-import com.aaa.andkotlininvaders.GameSceneViewModel.BulletInfo.bulletList
-import com.aaa.andkotlininvaders.GameSceneViewModel.BulletInfo.lock
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -144,10 +138,17 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         var dropViewHeight: Int = 0
         private val _lock = java.util.concurrent.locks.ReentrantLock()
         private val ammoList = mutableListOf<Ammo>()
+        private val _checkTarget = MutableStateFlow(Triple(UUID.randomUUID(), 0f, 0f))
+        val checkTarget = _checkTarget.asStateFlow()
+        fun addAmmo(ammo: Ammo) {
+            _lock.withLock {
+                ammoList.add(ammo)
+            }
+        }
         fun cleanupAmmos() {
             _lock.withLock {
                 ammoList.forEachMutableSafe { ammo, iterator ->
-                    if (ammo.bulletY < 0)
+                    if (ammo.ammoY < 0)
                         iterator.remove()
                 }
             }
@@ -158,6 +159,9 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
                         bullet,_ -> bullet.drawAmmo(canvas)
                 }
             }
+        }
+        fun reqCollisionCheck(id: UUID, bulletX: Float, bulletY: Float) {
+            _checkTarget.value = Triple(id, bulletX, bulletY)
         }
     }
 

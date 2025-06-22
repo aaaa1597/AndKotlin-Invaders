@@ -48,13 +48,13 @@ class BulletView: View {
 
 enum class Sender {PLAYER, ENEMY}
 class Bullet(private val bulletX: Float, initY: Float, private val sender: Sender,
-             aCheckCollisionCallback: (id: UUID, bulletX: Float, bulletY: Float) -> Unit) {
+             aCheckCollisionCallback: (id: UUID, sender: Sender, bulletX: Float, bulletY: Float) -> Unit) {
     val id: UUID = UUID.randomUUID()
     var bulletY: Float = initY
     private val bulletSize = 40F
     private val SPEED: Int = 300
     private val updatetimer: Timer = Timer()
-    val checkCollisionCallback: (id: UUID, bulletX: Float, bulletY: Float) -> Unit = aCheckCollisionCallback
+    val checkCollisionCallback: (id: UUID, sender: Sender, bulletX: Float, bulletY: Float) -> Unit = aCheckCollisionCallback
     private val bulletPaint = Paint().apply {
         color = if (sender == Sender.PLAYER) GameSceneViewModel.COLOR_BULLET_PLAYER
                 else GameSceneViewModel.COLOR_BULLET_ENEMY
@@ -69,7 +69,7 @@ class Bullet(private val bulletX: Float, initY: Float, private val sender: Sende
         /* Bulletは(BulletView同様)、自発的に(200msタイマで)位置更新&コリジョン判定をする */
         updatetimer.schedule(0, 200) {
             translate()
-            checkCollisionCallback(id, bulletX, bulletY)
+            checkCollisionCallback(id, sender, bulletX, bulletY)
         }
     }
 

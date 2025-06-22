@@ -10,6 +10,7 @@ import android.graphics.Picture
 import android.graphics.Rect
 import android.graphics.drawable.PictureDrawable
 import android.util.AttributeSet
+import android.util.Log
 import android.util.Range
 import android.view.MotionEvent
 import android.view.View
@@ -47,7 +48,8 @@ class SpaceShipView: View {
     private var leftWingsXRange = Range(0F, 0F)
     private var rightWingsXRange = Range(0F, 0F)
     private var wingsYRange = Range(0F, 0F)
-    private var spaceShipxPos: Job = Job()
+    private var spaceShipxPosJob: Job = Job()
+    private var collisionCheckJob: Job = Job()
     private lateinit var spaceShipPicture: Picture
     private lateinit var pictureDrawable: PictureDrawable
     private val jetPaint = Paint().apply {
@@ -111,9 +113,9 @@ class SpaceShipView: View {
         }
 
         /* 自機移動 */
-        spaceShipxPos.cancel()
+        spaceShipxPosJob.cancel()
         val lifecycleOwner = findViewTreeLifecycleOwner()!!
-        spaceShipxPos = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        spaceShipxPosJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             GameSceneViewModel.SpaceShipViewInfo.xPos.collect {
                 if (it > wingWidth && it < measuredWidth - wingWidth) {
                     currentShipPosition = it
@@ -126,11 +128,21 @@ class SpaceShipView: View {
                 }
             }
         }}
+
+        /* (要求に応じて)Ammoの衝突判定 */
+        collisionCheckJob.cancel()
+        collisionCheckJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            GameSceneViewModel.AmmoInfo.checkTarget.collect {
+                val (uuid, ammoX, ammoY) = it
+                checkCollisionAmmo(uuid, ammoX, ammoY)
+            }
+        }}
     }
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        spaceShipxPos.cancel()
+        spaceShipxPosJob.cancel()
+        collisionCheckJob.cancel()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -227,22 +239,36 @@ class SpaceShipView: View {
         GameSceneViewModel.BulletInfo.addBullet(Bullet(getShipX(), getShipY(), Sender.PLAYER, ::checkCollision))
     }
 
-    private fun checkCollision(id: UUID, bulletX: Float, bulletY: Float) {
+    private fun checkCollision(id: UUID, sender: Sender, bulletX: Float, bulletY: Float) {
         /* YがSpaceShipに未達 */
-        if (bulletY.roundToInt() > top)
+        if (bulletY.roundToInt() > top) {
+            Log.d("aaaaa", "aaaaa --return-- id:${id} sender:${sender} bulletY(${bulletY}) > top(${top})")
             return
+        }
+
+        Log.d("aaaaa", "aaaaa id:${id} sender:${sender} bulletY(${bulletY}) <= top(${top})")
 
         /* YがSpaceShipに到達, XもSpaceShip本体に衝突 */
-        if (mainBodyYRange.contains(bulletY) && mainBodyXRange.contains(bulletX))
+        if (mainBodyYRange.contains(bulletY) && mainBodyXRange.contains(bulletX)) {
+            Log.d("aaaaa", "->onPlayerHit() id:${id} sender:${sender} bulletY(${bulletY}) ⊂ mainBodyYRange(${mainBodyYRange}) && bulletX(${bulletX}) ⊂ mainBodyXRange(${mainBodyXRange})")
             onPlayerHit()
+        }
         /* YがSpaceShipに到達, XもSpaceShip左ウイングに衝突 */
-        else if (wingsYRange.contains(bulletY) && leftWingsXRange.contains(bulletX))
+        else if (wingsYRange.contains(bulletY) && leftWingsXRange.contains(bulletX)) {
+            Log.d("aaaaa", "->onPlayerHit() id:${id} sender:${sender} bulletY(${bulletY}) ⊂ wingsYRange(${wingsYRange}) && bulletX(${bulletX}) ⊂ leftWingsXRange(${leftWingsXRange})")
             onPlayerHit()
+        }
         /* YがSpaceShipに到達, XもSpaceShip右ウイングに衝突 */
-        else if (wingsYRange.contains(bulletY) && rightWingsXRange.contains(bulletX))
+        else if (wingsYRange.contains(bulletY) && rightWingsXRange.contains(bulletX)) {
+            Log.d("aaaaa", "->onPlayerHit() id:${id} sender:${sender} bulletY(${bulletY}) ⊂ wingsYRange(${wingsYRange}) && bulletX(${bulletX}) ⊂ rightWingsXRange(${rightWingsXRange})")
             onPlayerHit()
-        else
+        }
+        else {
+            Log.d("aaaaa", "Noooooo!! id:${id} sender:${sender} bulletY(${bulletY}) ⊂ mainBodyYRange(${mainBodyYRange}) && bulletX(${bulletX}) ⊂ mainBodyXRange(${mainBodyXRange})")
+            Log.d("aaaaa", "Noooooo!! id:${id} sender:${sender} bulletY(${bulletY}) ⊂ wingsYRange(${wingsYRange}) && bulletX(${bulletX}) ⊂ leftWingsXRange(${leftWingsXRange})")
+            Log.d("aaaaa", "Noooooo!! id:${id} sender:${sender} bulletY(${bulletY}) ⊂ wingsYRange(${wingsYRange}) && bulletX(${bulletX}) ⊂ rightWingsXRange(${rightWingsXRange})")
             return; /* 衝突してない */
+        }
 
         /* 衝突した弾丸は消去 */
         GameSceneViewModel.BulletInfo.removeAllBullets(id)
@@ -252,5 +278,10 @@ class SpaceShipView: View {
         GameSceneViewModel.Shake.onHit()
         GameSceneViewModel.LifeGaugeInfo.onHit()
         GameSceneViewModel.Vibrator.vibrate(64, 48)
+    }
+
+    private fun checkCollisionAmmo(id: UUID, ammoX: Float, ammoY: Float) {
+        if (ammoY.roundToInt() > top) return
+
     }
 }
