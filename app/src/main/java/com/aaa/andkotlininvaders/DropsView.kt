@@ -76,6 +76,10 @@ class Ammo(private val ammoX: Float, shipY: Float) {
         drawRect.top += SPEED.toFloat()
         drawRect.bottom += SPEED.toFloat()
         ammoY = drawRect.bottom
+        if (ammoY > GameSceneViewModel.AmmoInfo.dropViewHeight) {
+            GameSceneViewModel.AmmoInfo.removeAllAmmo(this.id)
+            updatetimer.cancel()
+        }
     }
 
     fun drawAmmo(canvas: Canvas) {
