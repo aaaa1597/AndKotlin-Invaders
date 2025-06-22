@@ -6,6 +6,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.os.VibrationEffect
 import android.os.VibratorManager
+import android.util.Log
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.Flow
@@ -89,37 +90,50 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         var bulletViewHeight: Int = 0
         /* bulletListへの操作はすべてlock(排他制御)してから使う */
         private val lock = java.util.concurrent.locks.ReentrantLock()
-        private val bulletList = mutableListOf<Bullet>()
-        fun init() { lock.withLock { bulletList.clear() } }
+        private val _bulletList = mutableListOf<Bullet>()
+        fun init() { lock.withLock { _bulletList.clear() } }
         fun drawBullets(canvas: Canvas) {
             lock.withLock {
-                bulletList.forEachSafe {
+                _bulletList.forEach { Log.d("aaaaa", "aaaaa drawBullets() --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${it.bulletX}) bulletY(${it.bulletY}))") }
+                _bulletList.forEachSafe {
                     bullet,_ -> bullet.drawBullet(canvas)
                 }
             }
         }
         fun cleanupBullets(measuredHeight: Int) {
             lock.withLock {
-                bulletList.forEachMutableSafe { bullet, iterator ->
+                _bulletList.forEachMutableSafe { bullet, iterator ->
+                    _bulletList.forEach { Log.d("aaaaa", "aaaaa cleanupBullets() --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${bullet.bulletX}) bulletY(${bullet.bulletY})) measuredHeight=${measuredHeight}") }
                     if (bullet.bulletY < 0 || bullet.bulletY > measuredHeight) {
+                        Log.d("aaaaa", "aaaaa cleanupBullets():::deleted__b --list(${_bulletList.size})-- id:${bullet.id} sender(${bullet.sender}) bulletX(${bullet.bulletX}) bulletY(${bullet.bulletY}))")
                         iterator.remove()
+                        _bulletList.forEach { Log.d("aaaaa", "aaaaa cleanupBullets():::deleted__b --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${bullet.bulletX}) bulletY(${bullet.bulletY}))") }
                     }
                 }
             }
         }
         fun findBullet(id: UUID): Bullet? {
             lock.withLock {
-                return bulletList.find { it.id == id }
+                return _bulletList.find { it.id == id }
             }
         }
         fun removeAllBullets(id: UUID) {
+            val stack = Throwable().stackTrace
+            println("    at ${stack[0].className}.${stack[0].methodName}(${stack[0].fileName}:${stack[0].lineNumber})")
+            println("    at ${stack[1].className}.${stack[1].methodName}(${stack[1].fileName}:${stack[1].lineNumber})")
+
             lock.withLock {
-                bulletList.removeAll { it.id == id }
+                _bulletList.forEach { Log.d("aaaaa", "aaaaa removeAllBullets()::b --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${it.bulletX}) bulletY(${it.bulletY}))") }
+                Log.d("aaaaa", "aaaaa removeAllBullets() id:${id}")
+                _bulletList.removeAll { it.id == id }
+                _bulletList.forEach { Log.d("aaaaa", "aaaaa removeAllBullets()::a --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${it.bulletX}) bulletY(${it.bulletY}))") }
             }
         }
         fun addBullet(bullet: Bullet) {
             lock.withLock {
-                bulletList.add(bullet)
+                _bulletList.forEach { Log.d("aaaaa", "aaaaa addBullet() --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${bullet.bulletX}) bulletY(${bullet.bulletY}))") }
+                Log.d("aaaaa", "aaaaa addBullet() id:${bullet.id} sender:${bullet.sender} bulletX(${bullet.bulletX}) bulletY(${bullet.bulletY}))")
+                _bulletList.add(bullet)
             }
         }
     }

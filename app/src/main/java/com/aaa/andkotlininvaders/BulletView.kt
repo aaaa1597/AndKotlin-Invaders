@@ -47,7 +47,7 @@ class BulletView: View {
 }
 
 enum class Sender {PLAYER, ENEMY}
-class Bullet(private val bulletX: Float, initY: Float, private val sender: Sender,
+class Bullet(val bulletX: Float, initY: Float, val sender: Sender,
              aCheckCollisionCallback: (id: UUID, sender: Sender, bulletX: Float, bulletY: Float) -> Unit) {
     val id: UUID = UUID.randomUUID()
     var bulletY: Float = initY
@@ -81,8 +81,10 @@ class Bullet(private val bulletX: Float, initY: Float, private val sender: Sende
         }
         else {
             bulletY += SPEED
-            if (bulletY > GameSceneViewModel.BulletInfo.bulletViewHeight)
+            if (bulletY > GameSceneViewModel.BulletInfo.bulletViewHeight) {
                 GameSceneViewModel.BulletInfo.removeAllBullets(this.id)
+                updatetimer.cancel()
+            }
         }
     }
 
