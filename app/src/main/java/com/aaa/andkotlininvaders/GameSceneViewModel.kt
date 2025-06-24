@@ -9,6 +9,7 @@ import android.os.VibratorManager
 import android.util.Log
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.AndroidViewModel
+import com.aaa.andkotlininvaders.GameSceneViewModel.AmmoInfo._checkTarget
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -91,10 +92,11 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         /* bulletListへの操作はすべてlock(排他制御)してから使う */
         private val lock = java.util.concurrent.locks.ReentrantLock()
         private val _bulletList = mutableListOf<Bullet>()
+        private val _checkTarget = MutableStateFlow(CollisionCheck(UUID.randomUUID(), Sender.PLAYER, 0f, 0f))
+        val checkTarget = _checkTarget.asStateFlow()
         fun init() { lock.withLock { _bulletList.clear() } }
         fun drawBullets(canvas: Canvas) {
             lock.withLock {
-                _bulletList.forEach { Log.d("aaaaa", "aaaaa drawBullets() --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${it.bulletX}) bulletY(${it.bulletY}))") }
                 _bulletList.forEachSafe {
                     bullet,_ -> bullet.drawBullet(canvas)
                 }
@@ -103,14 +105,12 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         fun cleanupBullets(measuredHeight: Int) {
             lock.withLock {
                 _bulletList.forEachMutableSafe { bullet, iterator ->
-                    _bulletList.forEach { Log.d("aaaaa", "aaaaa cleanupBullets()::b --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${bullet.bulletX}) bulletY(${bullet.bulletY})) measuredHeight=${measuredHeight}") }
-                    var dellist = mutableListOf<Bullet>()
+                    val dellist = mutableListOf<Bullet>()
                     if (bullet.bulletY < 0 || bullet.bulletY > measuredHeight)
                         dellist.add(bullet)
                     dellist.forEach {
                         removeAllBullets(it.id)
                     }
-                    _bulletList.forEach { Log.d("aaaaa", "aaaaa cleanupBullets()::a --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${bullet.bulletX}) bulletY(${bullet.bulletY})) measuredHeight=${measuredHeight}") }
                 }
             }
         }
@@ -120,22 +120,25 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
             }
         }
         fun removeAllBullets(id: UUID) {
-            val stack = Throwable().stackTrace
-            println("    at ${stack[0].className}.${stack[0].methodName}(${stack[0].fileName}:${stack[0].lineNumber})")
-            println("    at ${stack[1].className}.${stack[1].methodName}(${stack[1].fileName}:${stack[1].lineNumber})")
-
             lock.withLock {
-                _bulletList.forEach { Log.d("aaaaa", "aaaaa removeAllBullets()::b --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${it.bulletX}) bulletY(${it.bulletY}))") }
-                Log.d("aaaaa", "aaaaa removeAllBullets() id:${id}")
                 _bulletList.removeAll { it.id == id }
-                _bulletList.forEach { Log.d("aaaaa", "aaaaa removeAllBullets()::a --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${it.bulletX}) bulletY(${it.bulletY}))") }
             }
         }
         fun addBullet(bullet: Bullet) {
             lock.withLock {
-                _bulletList.forEach { Log.d("aaaaa", "aaaaa addBullet() --list(${_bulletList.size})-- id:${it.id} sender(${it.sender}) bulletX(${bullet.bulletX}) bulletY(${bullet.bulletY}))") }
-                Log.d("aaaaa", "aaaaa addBullet() id:${bullet.id} sender:${bullet.sender} bulletX(${bullet.bulletX}) bulletY(${bullet.bulletY}))")
                 _bulletList.add(bullet)
+            }
+        }
+        data class CollisionCheck(val id: UUID, val sender: Sender, val bulletX: Float, val bulletY: Float)
+        fun reqCollisionCheck(data: CollisionCheck) {
+            _checkTarget.value = data
+        }
+
+        fun debugPrinting() {
+            lock.withLock {
+                _bulletList.forEachIndexed { idx, item ->
+                    Log.d("aaaaa", "    [${idx}] id=${item.id} sender=${item.sender} x=${item.bulletX} Y=${item.bulletY}")
+                }
             }
         }
     }

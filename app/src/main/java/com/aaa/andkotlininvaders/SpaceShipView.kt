@@ -134,9 +134,22 @@ class SpaceShipView: View {
         collisionCheckJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             GameSceneViewModel.AmmoInfo.checkTarget.collect {
                 val (uuid, ammoX, ammoY) = it
-                checkCollisionAmmo(uuid, ammoX, ammoY)
+
+                if (mainBodyYRange.contains(ammoY) && (mainBodyXRange.contains(ammoX)) )
+                    onGetAmmo(uuid)
+
+                if (wingsYRange.contains(ammoY) && leftWingsXRange.contains(ammoX) )
+                    onGetAmmo(uuid)
+
+                if (wingsYRange.contains(ammoY) && rightWingsXRange.contains(ammoX) )
+                    onGetAmmo(uuid)
             }
         }}
+    }
+
+    private fun onGetAmmo(uuid: UUID) {
+        GameSceneViewModel.AmmoInfo.removeAllAmmo(uuid)
+        GameSceneViewModel.Score.updateScore(20)
     }
 
     override fun onDetachedFromWindow() {
@@ -236,7 +249,7 @@ class SpaceShipView: View {
     var fireSound: SoundManager? = null
     private fun fire() {
         fireSound?.play()
-        GameSceneViewModel.BulletInfo.addBullet(Bullet(getShipX(), getShipY(), Sender.PLAYER, ::checkCollision))
+        GameSceneViewModel.BulletInfo.addBullet(Bullet(getShipX(), getShipY(), Sender.PLAYER))
     }
 
     private fun checkCollision(id: UUID, sender: Sender, bulletX: Float, bulletY: Float) {
@@ -278,10 +291,5 @@ class SpaceShipView: View {
         GameSceneViewModel.Shake.onHit()
         GameSceneViewModel.LifeGaugeInfo.onHit()
         GameSceneViewModel.Vibrator.vibrate(64, 48)
-    }
-
-    private fun checkCollisionAmmo(id: UUID, ammoX: Float, ammoY: Float) {
-        if (ammoY.roundToInt() > top) return
-
     }
 }

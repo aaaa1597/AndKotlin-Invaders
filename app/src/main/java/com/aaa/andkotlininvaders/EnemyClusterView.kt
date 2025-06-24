@@ -37,6 +37,7 @@ class EnemyClusterView: View {
     private var translateJob: Job = Job()
     private var firingJob: Job = Job()
     private var gameclearJob: Job = Job()
+    private var collisionCheckJob: Job = Job()
     var fireSound: SoundManager? = null
     companion object {
         const val SPEED = 2F
@@ -54,6 +55,7 @@ class EnemyClusterView: View {
         translateJob.cancel()
         firingJob.cancel()
         gameclearJob.cancel()
+        collisionCheckJob.cancel()
     }
 
     @OptIn(ObsoleteCoroutinesApi::class)
@@ -102,6 +104,34 @@ class EnemyClusterView: View {
                     GameSceneViewModel.EnemyInfo.enemiesEliminated.collect {
                         if(it == 0) return@collect
                         findNavController().navigate(R.id.action_to_gamecleared_zoom)
+                    }
+                }}
+
+                collisionCheckJob.cancel()
+                collisionCheckJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                    GameSceneViewModel.BulletInfo.checkTarget.collect {
+                        val (id, sender, bulletX, bulletY) = it
+                        if(sender == Sender.ENEMY) return@collect
+
+                        val enemiesLines = GameSceneViewModel.EnemyInfo.enemiesLines
+                        enemiesLines.checkXForEach(bulletX) {            /* ここでX座標コリジョンをチェック */
+                            val findedEnemy = it.enemyList.reversed()
+                                .find { enemy -> enemy.checkEnemyYPosition(bulletY)}   /* ここでY座標コリジョンをチェック */
+
+                            findedEnemy?.let { enemy ->
+                                enemy.destroyEnemy(enemy)
+                                GameSceneViewModel.BulletInfo.removeAllBullets(id)
+                                val anyVisible = GameSceneViewModel.EnemyInfo.enemiesLines.any {
+                                    it.areAnyVisible()
+                                }
+                                /* 敵機全排除 → クリア */
+                                if (!anyVisible) {
+                                    GameSceneViewModel.Vibrator.vibrate(320)
+                                    /* 完了後、ゲーム画面に遷移 */
+                                    GameSceneViewModel.EnemyInfo.enemiesAllEliminated()
+                                }
+                            }
+                        }
                     }
                 }}
             }
@@ -181,12 +211,12 @@ fun List<Enemy>.getRangeX(): Pair<Float, Float> {
             }
 }
 
-inline fun List<EnemyColumn>.checkXForEach(x: Float, checkCollision: (EnemyColumn) -> Unit) {
+inline fun List<EnemyColumn>.checkXForEach(x: Float, func: (EnemyColumn) -> Unit) {
     val iterator = iterator()
     while (iterator.hasNext()) {
         val enemyColumn = iterator.next()
         if (enemyColumn.range.contains(x) && enemyColumn.areAnyVisible()) {
-            checkCollision(enemyColumn)
+            func(enemyColumn)
             return
         }
     }
@@ -218,38 +248,15 @@ class Enemy(private var fireSound: SoundManager?) {
 
     fun onFireCanon(enemyX: Float, enemyY: Float) {
         fireSound?.play()
-        GameSceneViewModel.BulletInfo.addBullet(Bullet(enemyX, enemyY, Sender.ENEMY, ::checkCollision))
+        GameSceneViewModel.BulletInfo.addBullet(Bullet(enemyX, enemyY, Sender.ENEMY))
     }
 
-    private fun checkCollision(id: UUID, sender: Sender, bulletX: Float, bulletY: Float) {
-        val enemiesLines = GameSceneViewModel.EnemyInfo.enemiesLines
-        enemiesLines.checkXForEach(bulletX) {            /* ここでX座標コリジョンをチェック */
-            val findedEnemy = it.enemyList.reversed().find { enemy ->
-                                enemy.checkEnemyYPosition(bulletY)     /* ここでY座標コリジョンをチェック */
-                              }
-
-            findedEnemy?.let { enemy ->
-                destroyEnemy(enemy)
-                GameSceneViewModel.BulletInfo.removeAllBullets(id)
-                val anyVisible = GameSceneViewModel.EnemyInfo.enemiesLines.any {
-                                    it.areAnyVisible()
-                                }
-                /* 敵機全排除 → クリア */
-                if (!anyVisible) {
-                    GameSceneViewModel.Vibrator.vibrate(320)
-                    /* 完了後、ゲーム画面に遷移 */
-                    GameSceneViewModel.EnemyInfo.enemiesAllEliminated()
-                }
-            }
-        }
-    }
-
-    private fun checkEnemyYPosition(bulletY: Float): Boolean {
+    fun checkEnemyYPosition(bulletY: Float): Boolean {
         return Range(enemyDelegate.getPositionY() - enemyDelegate.hitBoxRadius(),
             enemyDelegate.getPositionY() + enemyDelegate.hitBoxRadius()).contains(bulletY) && isVisible
     }
 
-    private fun destroyEnemy(destroyEnemy: Enemy) {
+    fun destroyEnemy(destroyEnemy: Enemy) {
         destroyEnemy.onHit()
         fireSound?.play()
         GameSceneViewModel.Vibrator.vibrate(64, 48)
