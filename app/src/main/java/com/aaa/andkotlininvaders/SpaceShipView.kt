@@ -22,7 +22,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import java.util.Timer
-import java.util.UUID
 import kotlin.concurrent.schedule
 import kotlin.math.roundToInt
 
@@ -88,7 +87,7 @@ class SpaceShipView: View {
             when(motionEvent.action) {
                 MotionEvent.ACTION_DOWN -> {
                     bursttimer?.cancel()    /* まれにUPが来ずにDOWNが来ることへの対策 */
-                    bursttimer = Timer().apply { schedule(0, 200) {
+                    bursttimer = Timer().apply { schedule(0, 1000) {
                         if(GameSceneViewModel.BulletRemain.remainFlow.value > 0) {
                             GameSceneViewModel.BulletRemain.decrement()
                             fire()
@@ -133,22 +132,22 @@ class SpaceShipView: View {
         collisionCheckJob.cancel()
         collisionCheckJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             GameSceneViewModel.AmmoInfo.checkTarget.collect {
-                val (uuid, ammoX, ammoY) = it
+                val (id, ammoX, ammoY) = it
 
                 if (mainBodyYRange.contains(ammoY) && (mainBodyXRange.contains(ammoX)) )
-                    onGetAmmo(uuid)
+                    onGetAmmo(id)
 
                 if (wingsYRange.contains(ammoY) && leftWingsXRange.contains(ammoX) )
-                    onGetAmmo(uuid)
+                    onGetAmmo(id)
 
                 if (wingsYRange.contains(ammoY) && rightWingsXRange.contains(ammoX) )
-                    onGetAmmo(uuid)
+                    onGetAmmo(id)
             }
         }}
     }
 
-    private fun onGetAmmo(uuid: UUID) {
-        GameSceneViewModel.AmmoInfo.removeAllAmmo(uuid)
+    private fun onGetAmmo(id: Int) {
+        GameSceneViewModel.AmmoInfo.removeAllAmmo(id)
         GameSceneViewModel.Score.updateScore(20)
     }
 
@@ -252,34 +251,25 @@ class SpaceShipView: View {
         GameSceneViewModel.BulletInfo.addBullet(Bullet(getShipX(), getShipY(), Sender.PLAYER))
     }
 
-    private fun checkCollision(id: UUID, sender: Sender, bulletX: Float, bulletY: Float) {
+    private fun checkCollision(id: Int, sender: Sender, bulletX: Float, bulletY: Float) {
         /* YがSpaceShipに未達 */
         if (bulletY.roundToInt() > top) {
-            Log.d("aaaaa", "aaaaa --return-- id:${id} sender:${sender} bulletY(${bulletY}) > top(${top})")
             return
         }
 
-        Log.d("aaaaa", "aaaaa id:${id} sender:${sender} bulletY(${bulletY}) <= top(${top})")
-
         /* YがSpaceShipに到達, XもSpaceShip本体に衝突 */
         if (mainBodyYRange.contains(bulletY) && mainBodyXRange.contains(bulletX)) {
-            Log.d("aaaaa", "->onPlayerHit() id:${id} sender:${sender} bulletY(${bulletY}) ⊂ mainBodyYRange(${mainBodyYRange}) && bulletX(${bulletX}) ⊂ mainBodyXRange(${mainBodyXRange})")
             onPlayerHit()
         }
         /* YがSpaceShipに到達, XもSpaceShip左ウイングに衝突 */
         else if (wingsYRange.contains(bulletY) && leftWingsXRange.contains(bulletX)) {
-            Log.d("aaaaa", "->onPlayerHit() id:${id} sender:${sender} bulletY(${bulletY}) ⊂ wingsYRange(${wingsYRange}) && bulletX(${bulletX}) ⊂ leftWingsXRange(${leftWingsXRange})")
             onPlayerHit()
         }
         /* YがSpaceShipに到達, XもSpaceShip右ウイングに衝突 */
         else if (wingsYRange.contains(bulletY) && rightWingsXRange.contains(bulletX)) {
-            Log.d("aaaaa", "->onPlayerHit() id:${id} sender:${sender} bulletY(${bulletY}) ⊂ wingsYRange(${wingsYRange}) && bulletX(${bulletX}) ⊂ rightWingsXRange(${rightWingsXRange})")
             onPlayerHit()
         }
         else {
-            Log.d("aaaaa", "Noooooo!! id:${id} sender:${sender} bulletY(${bulletY}) ⊂ mainBodyYRange(${mainBodyYRange}) && bulletX(${bulletX}) ⊂ mainBodyXRange(${mainBodyXRange})")
-            Log.d("aaaaa", "Noooooo!! id:${id} sender:${sender} bulletY(${bulletY}) ⊂ wingsYRange(${wingsYRange}) && bulletX(${bulletX}) ⊂ leftWingsXRange(${leftWingsXRange})")
-            Log.d("aaaaa", "Noooooo!! id:${id} sender:${sender} bulletY(${bulletY}) ⊂ wingsYRange(${wingsYRange}) && bulletX(${bulletX}) ⊂ rightWingsXRange(${rightWingsXRange})")
             return; /* 衝突してない */
         }
 

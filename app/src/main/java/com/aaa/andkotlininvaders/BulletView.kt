@@ -6,7 +6,6 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import java.util.Timer
-import java.util.UUID
 import kotlin.concurrent.schedule
 
 class BulletView: View {
@@ -37,7 +36,7 @@ class BulletView: View {
         GameSceneViewModel.BulletInfo.drawBullets(canvas)
     }
 
-    fun removeBullet(id: UUID) {
+    fun removeBullet(id: Int) {
         post {
             val bullet = GameSceneViewModel.BulletInfo.findBullet(id)
             if(bullet!=null)
@@ -48,10 +47,10 @@ class BulletView: View {
 
 enum class Sender {PLAYER, ENEMY}
 class Bullet(val bulletX: Float, initY: Float, val sender: Sender) {
-    val id: UUID = UUID.randomUUID()
+    val id: Int = Utils.getSeqno()
     var bulletY: Float = initY
     private val bulletSize = 40F
-    private val SPEED: Int = 300
+    private val SPEED: Int = 150
     private val updatetimer: Timer = Timer()
     private val bulletPaint = Paint().apply {
         color = if (sender == Sender.PLAYER) GameSceneViewModel.COLOR_BULLET_PLAYER
@@ -75,13 +74,15 @@ class Bullet(val bulletX: Float, initY: Float, val sender: Sender) {
     private fun translate() {
         if (sender == Sender.PLAYER) {
             bulletY -= SPEED
-            if (bulletY < 0)
-                GameSceneViewModel.BulletInfo.removeAllBullets(this.id)
+            if (bulletY < 0) {
+                GameSceneViewModel.BulletInfo.removeAllBullets(id)
+                updatetimer.cancel()
+            }
         }
         else {
             bulletY += SPEED
             if (bulletY > GameSceneViewModel.BulletInfo.bulletViewHeight) {
-                GameSceneViewModel.BulletInfo.removeAllBullets(this.id)
+                GameSceneViewModel.BulletInfo.removeAllBullets(id)
                 updatetimer.cancel()
             }
         }

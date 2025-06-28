@@ -9,13 +9,11 @@ import android.os.VibratorManager
 import android.util.Log
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.AndroidViewModel
-import com.aaa.andkotlininvaders.GameSceneViewModel.AmmoInfo._checkTarget
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import java.util.UUID
 import kotlin.concurrent.withLock
 
 class GameSceneViewModel(application: Application) : AndroidViewModel(application) {
@@ -92,7 +90,7 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         /* bulletListへの操作はすべてlock(排他制御)してから使う */
         private val lock = java.util.concurrent.locks.ReentrantLock()
         private val _bulletList = mutableListOf<Bullet>()
-        private val _checkTarget = MutableStateFlow(CollisionCheck(UUID.randomUUID(), Sender.PLAYER, 0f, 0f))
+        private val _checkTarget = MutableStateFlow(CollisionCheck(Utils.getSeqno(), Sender.PLAYER, 0f, 0f))
         val checkTarget = _checkTarget.asStateFlow()
         fun init() { lock.withLock { _bulletList.clear() } }
         fun drawBullets(canvas: Canvas) {
@@ -104,22 +102,18 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         }
         fun cleanupBullets(measuredHeight: Int) {
             lock.withLock {
-                _bulletList.forEachMutableSafe { bullet, iterator ->
-                    val dellist = mutableListOf<Bullet>()
-                    if (bullet.bulletY < 0 || bullet.bulletY > measuredHeight)
-                        dellist.add(bullet)
-                    dellist.forEach {
-                        removeAllBullets(it.id)
-                    }
+                val dellist = _bulletList.filter { (it.bulletY < 0 || it.bulletY > measuredHeight) }
+                dellist.forEach {
+                    removeAllBullets(it.id)
                 }
             }
         }
-        fun findBullet(id: UUID): Bullet? {
+        fun findBullet(id: Int): Bullet? {
             lock.withLock {
                 return _bulletList.find { it.id == id }
             }
         }
-        fun removeAllBullets(id: UUID) {
+        fun removeAllBullets(id: Int) {
             lock.withLock {
                 _bulletList.removeAll { it.id == id }
             }
@@ -129,7 +123,7 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
                 _bulletList.add(bullet)
             }
         }
-        data class CollisionCheck(val id: UUID, val sender: Sender, val bulletX: Float, val bulletY: Float)
+        data class CollisionCheck(val id: Int, val sender: Sender, val bulletX: Float, val bulletY: Float)
         fun reqCollisionCheck(data: CollisionCheck) {
             _checkTarget.value = data
         }
@@ -157,7 +151,7 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         var dropViewHeight: Int = 0
         private val _lock = java.util.concurrent.locks.ReentrantLock()
         private val _ammoList = mutableListOf<Ammo>()
-        private val _checkTarget = MutableStateFlow(Triple(UUID.randomUUID(), 0f, 0f))
+        private val _checkTarget = MutableStateFlow(Triple(Utils.getSeqno(), 0f, 0f))
         val checkTarget = _checkTarget.asStateFlow()
         fun addAmmo(ammo: Ammo) {
             _lock.withLock {
@@ -179,10 +173,10 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
                 }
             }
         }
-        fun reqCollisionCheck(id: UUID, bulletX: Float, bulletY: Float) {
+        fun reqCollisionCheck(id: Int, bulletX: Float, bulletY: Float) {
             _checkTarget.value = Triple(id, bulletX, bulletY)
         }
-        fun removeAllAmmo(id: UUID) {
+        fun removeAllAmmo(id: Int) {
             _lock.withLock {
                 _ammoList.removeAll { it.id == id }
             }

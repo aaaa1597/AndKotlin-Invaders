@@ -24,7 +24,6 @@ import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.ticker
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import java.util.UUID
 import kotlin.random.Random
 
 class EnemyClusterView: View {
@@ -119,7 +118,7 @@ class EnemyClusterView: View {
                                 .find { enemy -> enemy.checkEnemyYPosition(bulletY)}   /* ここでY座標コリジョンをチェック */
 
                             findedEnemy?.let { enemy ->
-                                enemy.destroyEnemy(enemy)
+                                enemy.hitEnemy(enemy)
                                 GameSceneViewModel.BulletInfo.removeAllBullets(id)
                                 val anyVisible = GameSceneViewModel.EnemyInfo.enemiesLines.any {
                                     it.areAnyVisible()
@@ -252,18 +251,18 @@ class Enemy(private var fireSound: SoundManager?) {
     }
 
     fun checkEnemyYPosition(bulletY: Float): Boolean {
-        return Range(enemyDelegate.getPositionY() - enemyDelegate.hitBoxRadius(),
-            enemyDelegate.getPositionY() + enemyDelegate.hitBoxRadius()).contains(bulletY) && isVisible
+        return Range(-2000f, enemyDelegate.getPositionY() + enemyDelegate.hitBoxRadius())
+                        .contains(bulletY) && isVisible
     }
 
-    fun destroyEnemy(destroyEnemy: Enemy) {
+    fun hitEnemy(destroyEnemy: Enemy) {
         destroyEnemy.onHit()
         fireSound?.play()
         GameSceneViewModel.Vibrator.vibrate(64, 48)
         dropAmmoIfItHave(destroyEnemy)
     }
 
-    fun onHit() {
+    private fun onHit() {
         enemyLife--
         if (enemyLife <= 0)
             GameSceneViewModel.Score.updateScore(points)

@@ -7,7 +7,6 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import java.util.Timer
-import java.util.UUID
 import kotlin.concurrent.schedule
 
 class DropsView: View {
@@ -39,7 +38,7 @@ class DropsView: View {
 }
 
 class Ammo(private val ammoX: Float, shipY: Float) {
-    val id: UUID = UUID.randomUUID()
+    val id: Int = Utils.getSeqno()
     var ammoY: Float = shipY
     val SPEED: Int = 6
     private val updatetimer: Timer = Timer()
