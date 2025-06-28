@@ -41,10 +41,21 @@ object DataStore {
     private const val HIGH_SCORE = "HIGH_SCORE"
     private const val MAX_LEVEL = "MAX_LEVEL"
     fun setHighScore(context: Context, score: Int, level: Int) {
-        val pref = context.getSharedPreferences("Data", MODE_PRIVATE).edit()
-        pref.putInt(HIGH_SCORE, score)
-        pref.putInt(MAX_LEVEL, level)
-        pref.apply()
+        val maxLevel = getMaxLevels(context)
+        if(level < maxLevel) return
+
+        val highScore = getHighScore(context)
+        if(level==maxLevel && highScore < score) {
+            val pref = context.getSharedPreferences("Data", MODE_PRIVATE).edit()
+            pref.putInt(HIGH_SCORE, score)
+            pref.apply()
+        }
+        else if(level > maxLevel) {
+            val pref = context.getSharedPreferences("Data", MODE_PRIVATE).edit()
+            pref.putInt(MAX_LEVEL, level)
+            pref.putInt(HIGH_SCORE, score)
+            pref.apply()
+        }
     }
 
     fun getHighScore(context: Context): Int {
