@@ -48,7 +48,8 @@ class SpaceShipView: View {
     private var rightWingsXRange = Range(0F, 0F)
     private var wingsYRange = Range(0F, 0F)
     private var spaceShipxPosJob: Job = Job()
-    private var collisionCheckJob: Job = Job()
+    private var collisionCheckAmmoJob: Job = Job()
+    private var collisionCheckBulletJob: Job = Job()
     private lateinit var spaceShipPicture: Picture
     private lateinit var pictureDrawable: PictureDrawable
     private val jetPaint = Paint().apply {
@@ -129,8 +130,8 @@ class SpaceShipView: View {
         }}
 
         /* (要求に応じて)Ammoの衝突判定 */
-        collisionCheckJob.cancel()
-        collisionCheckJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+        collisionCheckAmmoJob.cancel()
+        collisionCheckAmmoJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             GameSceneViewModel.AmmoInfo.checkTarget.collect {
                 val (id, ammoX, ammoY) = it
 
@@ -144,6 +145,34 @@ class SpaceShipView: View {
                     onGetAmmo(id)
             }
         }}
+
+        /* Bulletの衝突判定 */
+        collisionCheckBulletJob.cancel()
+        collisionCheckBulletJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            GameSceneViewModel.BulletInfo.checkTarget.collect {
+                val (id, sender, bulletX, bulletY) = it
+                if (sender == Sender.PLAYER) return@collect
+
+                /* YがSpaceShipに未達 */
+                if (bulletY.roundToInt() < top)
+                    return@collect
+
+                /* YがSpaceShipに到達, XもSpaceShip本体に衝突 */
+                if (mainBodyYRange.contains(bulletY) && mainBodyXRange.contains(bulletX))
+                    onPlayerHit()
+                /* YがSpaceShipに到達, XもSpaceShip左ウイングに衝突 */
+                else if (wingsYRange.contains(bulletY) && leftWingsXRange.contains(bulletX))
+                    onPlayerHit()
+                /* YがSpaceShipに到達, XもSpaceShip右ウイングに衝突 */
+                else if (wingsYRange.contains(bulletY) && rightWingsXRange.contains(bulletX))
+                    onPlayerHit()
+                else
+                    return@collect; /* 衝突してない */
+
+                /* 衝突した弾丸は消去 */
+                GameSceneViewModel.BulletInfo.removeAllBullets(id)
+            }
+        }}
     }
 
     private fun onGetAmmo(id: Int) {
@@ -154,7 +183,8 @@ class SpaceShipView: View {
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         spaceShipxPosJob.cancel()
-        collisionCheckJob.cancel()
+        collisionCheckAmmoJob.cancel()
+        collisionCheckBulletJob.cancel()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
@@ -167,8 +197,8 @@ class SpaceShipView: View {
         bodyTopPoint = h / 3F
         wingWidth = w / 15F
         missileSize = h / 8F
-        mainBodyYRange = Range(top + streamLinedTopPoint, (top + halfHeight + bodyTopPoint) - missileSize)
-        wingsYRange = Range((top + halfHeight + bodyTopPoint) - missileSize, top + halfHeight + bodyTopPoint)
+        mainBodyYRange = Range(top + streamLinedTopPoint, 4000f)
+        wingsYRange = Range((top + halfHeight + bodyTopPoint) - missileSize, 4000f)
         initPicture()
         ObjectAnimator.ofFloat(this, "translationY", h.toFloat(), 0f).apply {
             duration = 1200
@@ -253,9 +283,8 @@ class SpaceShipView: View {
 
     private fun checkCollision(id: Int, sender: Sender, bulletX: Float, bulletY: Float) {
         /* YがSpaceShipに未達 */
-        if (bulletY.roundToInt() > top) {
+        if (bulletY.roundToInt() > top)
             return
-        }
 
         /* YがSpaceShipに到達, XもSpaceShip本体に衝突 */
         if (mainBodyYRange.contains(bulletY) && mainBodyXRange.contains(bulletX)) {
@@ -269,9 +298,8 @@ class SpaceShipView: View {
         else if (wingsYRange.contains(bulletY) && rightWingsXRange.contains(bulletX)) {
             onPlayerHit()
         }
-        else {
+        else
             return; /* 衝突してない */
-        }
 
         /* 衝突した弾丸は消去 */
         GameSceneViewModel.BulletInfo.removeAllBullets(id)

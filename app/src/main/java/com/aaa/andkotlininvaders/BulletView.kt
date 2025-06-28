@@ -94,4 +94,8 @@ class Bullet(val bulletX: Float, initY: Float, val sender: Sender) {
         else
             canvas.drawLine(bulletX, bulletY, bulletX,bulletY-bulletSize, bulletPaint)
     }
+
+    fun destroy() {
+      updatetimer.cancel()
+    }
 }

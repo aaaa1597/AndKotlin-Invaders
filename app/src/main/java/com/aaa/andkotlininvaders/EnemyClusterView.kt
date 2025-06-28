@@ -251,7 +251,7 @@ class Enemy(private var fireSound: SoundManager?) {
     }
 
     fun checkEnemyYPosition(bulletY: Float): Boolean {
-        return Range(-2000f, enemyDelegate.getPositionY() + enemyDelegate.hitBoxRadius())
+        return Range(-4000f, enemyDelegate.getPositionY() + enemyDelegate.hitBoxRadius())
                         .contains(bulletY) && isVisible
     }
 

@@ -115,6 +115,8 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         }
         fun removeAllBullets(id: Int) {
             lock.withLock {
+                val bullets = _bulletList.filter { it.id == id }
+                bullets.forEach { it.destroy() }
                 _bulletList.removeAll { it.id == id }
             }
         }
