@@ -1,10 +1,12 @@
 package com.aaa.andkotlininvaders
 
+import android.animation.ObjectAnimator
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.LinearInterpolator
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import com.aaa.andkotlininvaders.databinding.FragmentGameClearedBinding
@@ -43,6 +45,15 @@ class GameClearedFragment : Fragment() {
         /* 終了ボタン */
         _binding.btnExit2.setOnClickListener {
             requireActivity().finish()
+        }
+
+        /* クリア文字を点滅 */
+        ObjectAnimator.ofFloat(_binding.txtCleared, "alpha", 1.0f, 0.0f).apply {
+            repeatCount = ObjectAnimator.INFINITE
+            repeatMode = ObjectAnimator.REVERSE
+            duration = 1000
+            interpolator = LinearInterpolator()
+            start()
         }
     }
 }
