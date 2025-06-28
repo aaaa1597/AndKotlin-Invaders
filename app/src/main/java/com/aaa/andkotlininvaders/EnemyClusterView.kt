@@ -88,7 +88,7 @@ class EnemyClusterView: View {
 
                 firingJob.cancel()
                 firingJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    ticker(1000, 200).receiveAsFlow().collect {
+                    ticker(500, 200).receiveAsFlow().collect {
                         val enemyList = GameSceneViewModel.EnemyInfo.enemiesLines
                         if (enemyList.isNotEmpty()) {
                             val enemyLine = enemyList.random()
