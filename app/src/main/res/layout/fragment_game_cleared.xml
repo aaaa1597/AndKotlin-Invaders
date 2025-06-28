@@ -10,12 +10,13 @@
     <TextView
         android:id="@+id/txt_cleared"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:text="@string/level_complete"
         android:textColor="@color/white"
         android:textSize="@dimen/text_44_size"
+        android:gravity="bottom"
         app:fontFamily="@font/naguri"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHeight_percent="0.4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
