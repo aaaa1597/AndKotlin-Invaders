@@ -17,4 +17,11 @@ class MainActivityViewModel : ViewModel() {
             Log.d("aaaaa", "aaaaa _mute.value=${_mute.value}")
     }
 
+    /* レベル */
+    object LevelInfo {
+        var level = 0
+            get() = field
+        fun resetLevel() { level = 0 }
+        fun increment() = level++
+    }
 }

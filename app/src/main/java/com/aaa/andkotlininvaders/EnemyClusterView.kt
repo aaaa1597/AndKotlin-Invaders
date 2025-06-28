@@ -46,7 +46,7 @@ class EnemyClusterView: View {
 
     init {
         if(rowSize < MAXROWSIZE)
-            rowSize = GameSceneViewModel.LevelInfo.level + 1
+            rowSize = MainActivityViewModel.LevelInfo.level + 1
     }
 
     override fun onDetachedFromWindow() {
@@ -101,7 +101,8 @@ class EnemyClusterView: View {
                 gameclearJob.cancel()
                 gameclearJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     GameSceneViewModel.EnemyInfo.enemiesEliminated.collect {
-                        if(it == 0) return@collect
+                        if( !it) return@collect
+                        GameSceneViewModel.EnemyInfo.clearEnemiesAllEliminated()
                         findNavController().navigate(R.id.action_to_gamecleared_zoom)
                     }
                 }}
@@ -273,7 +274,7 @@ class Enemy(private var fireSound: SoundManager?) {
     private fun dropAmmoIfItHave(enemy: Enemy) {
         if(!enemy.hasDrops) return
         if(enemy.enemyLife != 0) return
-        if(GameSceneViewModel.LevelInfo.level == 0) return
+        if(MainActivityViewModel.LevelInfo.level == 0) return
         GameSceneViewModel.AmmoInfo.addAmmo(Ammo(enemy.enemyX, enemy.enemyY))
     }
 

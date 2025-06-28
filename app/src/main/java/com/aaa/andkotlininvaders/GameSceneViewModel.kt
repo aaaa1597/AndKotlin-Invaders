@@ -39,13 +39,6 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         BulletInfo.init()
     }
 
-    /* レベル */
-    object LevelInfo {
-        var level = 0
-        fun resetLevel() { level = 1 }
-        fun increment() = level++
-    }
-
     /* 残り弾薬数 */
     object BulletRemain {
         private const val MAX_REMAIN = 80
@@ -142,10 +135,13 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
     /* 敵機情報 */
     object EnemyInfo {
         val enemiesLines = mutableListOf( EnemyColumn() )
-        private val _enemiesEliminated = MutableStateFlow(0)
+        private val _enemiesEliminated = MutableStateFlow(false)
         val enemiesEliminated = _enemiesEliminated.asStateFlow()
         fun enemiesAllEliminated() {
-            _enemiesEliminated.value = 1
+            _enemiesEliminated.value = true
+        }
+        fun clearEnemiesAllEliminated() {
+            _enemiesEliminated.value = false
         }
     }
 
