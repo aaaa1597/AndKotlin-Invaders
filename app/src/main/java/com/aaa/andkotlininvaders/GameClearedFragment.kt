@@ -26,7 +26,7 @@ class GameClearedFragment : Fragment() {
         /* レベル数文字列設定 */
         MainActivityViewModel.LevelInfo.level
         val level = MainActivityViewModel.LevelInfo.level+1
-        _binding.txtCleared.text = resources.getText(R.string.level_complete, level.toString())
+        _binding.txtCleared.text = resources.getString(R.string.level_complete, level)
 
         /* 次レベル開始 */
         _binding.btnRestart2.setOnClickListener {
