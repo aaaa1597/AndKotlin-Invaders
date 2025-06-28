@@ -35,7 +35,7 @@ class MainMenuFragment : Fragment() {
 
         /* ゲーム開始 */
         _binding.btnStart.setOnClickListener {
-            val bundle = bundleOf("LEVEL" to 1)
+            val bundle = bundleOf("LEVEL" to MainActivityViewModel.LevelInfo.level+1)
             findNavController().navigate(R.id.action_to_countdown_zoom, bundle)
         }
 
@@ -50,13 +50,6 @@ class MainMenuFragment : Fragment() {
         }
 
         _binding.root.viewTreeObserver.addOnGlobalLayoutListener {
-            if(lifecycle.currentState != Lifecycle.State.RESUMED)
-                return@addOnGlobalLayoutListener
-
-            Log.d("aaaaa", "aaaaa MainMenuFragment::onViewCreated() R.id.main(left,top,right,bottom)=(${_binding.root.left},${_binding.root.top},${_binding.root.right},${_binding.root.bottom})")
-            Log.d("aaaaa", "aaaaa MainMenuFragment::onViewCreated() R.id.main(x,y,translationX,translationY)=(${_binding.root.x},${_binding.root.y},${_binding.root.translationX},${_binding.root.translationY})")
-            Log.d("aaaaa", "aaaaa MainMenuFragment::onViewCreated() R.id.main(left+translationX,top+translationY)=(${_binding.root.left+_binding.root.translationX},${_binding.root.top+_binding.root.translationY}})")
-
             _binding.logoView.apply {
                 translationY = -(top+height.toFloat()+20)
                 postDelayed({animate().translationY(0f).setDuration(300)}, 600)

@@ -5,8 +5,9 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import com.aaa.andkotlininvaders.databinding.FragmentGameClearedBinding
-import com.aaa.andkotlininvaders.databinding.FragmentGameSceneBinding
 
 class GameClearedFragment : Fragment() {
     private lateinit var _binding: FragmentGameClearedBinding
@@ -21,8 +22,27 @@ class GameClearedFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        MainActivityViewModel.LevelInfo.level++
-        val level = MainActivityViewModel.LevelInfo.level
+
+        /* レベル数文字列設定 */
+        MainActivityViewModel.LevelInfo.level
+        val level = MainActivityViewModel.LevelInfo.level+1
         _binding.txtCleared.text = resources.getText(R.string.level_complete, level.toString())
+
+        /* 次レベル開始 */
+        _binding.btnRestart2.setOnClickListener {
+            MainActivityViewModel.LevelInfo.increment()
+            val bundle = bundleOf("LEVEL" to MainActivityViewModel.LevelInfo.level+1)
+            findNavController().navigate(R.id.action_to_countdown_zoom2, bundle)
+        }
+
+        /* スコア画面 */
+        _binding.btnViewScores2.setOnClickListener {
+            findNavController().navigate(R.id.action_to_highScores_zoom2)
+        }
+
+        /* 終了ボタン */
+        _binding.btnExit2.setOnClickListener {
+            requireActivity().finish()
+        }
     }
 }

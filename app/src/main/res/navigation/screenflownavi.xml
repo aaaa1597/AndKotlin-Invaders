@@ -78,5 +78,20 @@
         android:id="@+id/gameClearedFragment"
         android:name="com.aaa.andkotlininvaders.GameClearedFragment"
         android:label="fragment_game_cleared"
-        tools:layout="@layout/fragment_game_cleared" />
+        tools:layout="@layout/fragment_game_cleared">
+        <action
+            android:id="@+id/action_to_highScores_zoom2"
+            app:destination="@id/highScoresFragment"
+            app:enterAnim="@anim/nav_zoom_enter_anim"
+            app:exitAnim="@anim/nav_zoom_exit_anim"
+            app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
+            app:popExitAnim="@anim/nav_zoom_pop_exit_anim" />
+        <action
+            android:id="@+id/action_to_countdown_zoom2"
+            app:destination="@id/countdownFragment"
+            app:enterAnim="@anim/nav_zoom_enter_anim"
+            app:exitAnim="@anim/nav_zoom_exit_anim"
+            app:popEnterAnim="@anim/nav_zoom_pop_enter_anim"
+            app:popExitAnim="@anim/nav_zoom_pop_exit_anim" />
+    </fragment>
 </navigation>

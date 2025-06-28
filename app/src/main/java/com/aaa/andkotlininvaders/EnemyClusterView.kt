@@ -102,6 +102,7 @@ class EnemyClusterView: View {
                 gameclearJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     GameSceneViewModel.EnemyInfo.enemiesEliminated.collect {
                         if( !it) return@collect
+                        DataStore.setHighScore(context, GameSceneViewModel.Score.scoreFlow.value.toInt(), MainActivityViewModel.LevelInfo.level)
                         GameSceneViewModel.EnemyInfo.clearEnemiesAllEliminated()
                         findNavController().navigate(R.id.action_to_gamecleared_zoom)
                     }
