@@ -12,8 +12,9 @@ class SoundManager(context: Context) : DefaultLifecycleObserver {
     private var soundPool: SoundPool = SoundPool.Builder()
                                 .setMaxStreams(2)
                                 .setAudioAttributes(AudioAttributes.Builder()
-                                                                   .setContentType(CONTENT_TYPE_MUSIC)
-                                                                   .build())
+                                    .setUsage(AudioAttributes.USAGE_GAME)
+                                    .setContentType(CONTENT_TYPE_MUSIC)
+                                    .build())
                                 .build()
     var soundId: Int = 0
     var streamId: Int = 0
