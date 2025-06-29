@@ -11,6 +11,7 @@ import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.RectF
 import android.util.AttributeSet
+import android.util.Log
 import android.util.Range
 import android.view.View
 import androidx.lifecycle.Lifecycle
@@ -413,7 +414,7 @@ class CapitalShip : IEnemyShip {
     override fun hitBoxRadius(): Float = coreRadius
 }
 
-/* CapitalShip */
+/* AlienShip */
 class AlienShip : IEnemyShip {
     private val drawRect = RectF(0F, 0F, 0F, 0F)
     var enemyX = 0F
@@ -497,7 +498,7 @@ class AlienShip : IEnemyShip {
     override fun hitBoxRadius(): Float = coreRadius
 }
 
-/* CapitalShip */
+/* TieFighter */
 class TieFighter : IEnemyShip {
     private val drawRect = RectF(0F, 0F, 0F, 0F)
     var enemyX = 0F
@@ -575,6 +576,6 @@ class TieFighter : IEnemyShip {
     }
 
     override fun getPositionX() = enemyX
-    override fun getPositionY() = enemyX
+    override fun getPositionY() = enemyY
     override fun hitBoxRadius() = coreRadius
 }
