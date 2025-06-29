@@ -40,7 +40,7 @@ class DropsView: View {
 class Ammo(private val ammoX: Float, shipY: Float) {
     val id: Int = Utils.getSeqno()
     var ammoY: Float = shipY
-    val SPEED: Int = 6
+    val SPEED: Int = 100
     private val updatetimer: Timer = Timer()
     private val ammoPaint = Paint().apply {
         color = GameSceneViewModel.COLOR_AMMO_DROP
