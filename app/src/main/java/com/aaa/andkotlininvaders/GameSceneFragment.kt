@@ -1,10 +1,8 @@
 package com.aaa.andkotlininvaders
 
-import android.content.Context
 import android.graphics.Color
 import androidx.fragment.app.viewModels
 import android.os.Bundle
-import android.os.VibratorManager
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -16,8 +14,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.aaa.andkotlininvaders.EnemyClusterView.EnemyClusterViewEventCallback
+import com.aaa.andkotlininvaders.GameSceneViewModel.SwitchScreen.SS.*
 import com.aaa.andkotlininvaders.databinding.FragmentGameSceneBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
@@ -26,6 +25,7 @@ class GameSceneFragment : Fragment() {
     private val viewModel: GameSceneViewModel by viewModels()
     private var scoreFlowJob: Job = Job()
     private var remainFlowJob: Job = Job()
+    private var transFlowJob: Job = Job()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +69,28 @@ class GameSceneFragment : Fragment() {
                 }
             }
         }}
+
+        transFlowJob = lifecycleScope.launch(Dispatchers.Main.immediate) {repeatOnLifecycle(Lifecycle.State.CREATED) {
+            GameSceneViewModel.SwitchScreen.translate.collect {
+                when(it) {
+                    GS2GameCleared -> {
+                        parentFragmentManager.beginTransaction()
+                            .setReorderingAllowed(true)
+                            .setCustomAnimations(R.anim.nav_zoom_enter_anim, R.anim.nav_zoom_exit_anim)
+                            .replace(R.id.fcv_container, GameClearedFragment())
+                            .commit();
+                    }
+                    GS2YouDied     -> {
+                        parentFragmentManager.beginTransaction()
+                            .setReorderingAllowed(true)
+                            .setCustomAnimations(R.anim.nav_zoom_enter_anim, R.anim.nav_zoom_exit_anim)
+                            .replace(R.id.fcv_container, YouDiedFragment())
+                            .commit();
+                    }
+                    None -> {/* 何もしない */}
+                }
+            }
+        }}
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,savedInstanceState: Bundle?): View {
@@ -82,18 +104,13 @@ class GameSceneFragment : Fragment() {
         lifecycle.addObserver(soundManager)
         _binding.viwSpaceShipView.fireSound   = soundManager
         _binding.viwEnemyclusterview.fireSound= soundManager
-        _binding.viwEnemyclusterview.setOnEnemyClusterViewEventCallback(object: EnemyClusterViewEventCallback {
-            override fun onEnemyBreached() {
-                /* ゲームオーバー画面に遷移 */
-                findNavController().navigate(R.id.action_to_youdeid_zoom)
-            }
-        })
     }
 
     override fun onDestroy() {
         super.onDestroy()
         scoreFlowJob.cancel()
         remainFlowJob.cancel()
+        transFlowJob.cancel()
     }
 
     companion object {

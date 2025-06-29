@@ -51,7 +51,7 @@
         android:label="fragment_game_scene"
         tools:layout="@layout/fragment_game_scene" >
         <action
-            android:id="@+id/action_to_youdeid_zoom"
+            android:id="@+id/action_to_youdied_zoom"
             app:destination="@id/youDiedFragment"
             app:enterAnim="@anim/nav_zoom_enter_anim"
             app:exitAnim="@anim/nav_zoom_exit_anim"

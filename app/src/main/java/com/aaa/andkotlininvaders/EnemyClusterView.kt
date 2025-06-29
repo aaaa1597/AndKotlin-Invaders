@@ -20,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.findNavController
 import com.aaa.andkotlininvaders.GlobalCounter.enemyTimerFlow
+import com.aaa.andkotlininvaders.GameSceneViewModel.SwitchScreen.SS
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ObsoleteCoroutinesApi
 import kotlinx.coroutines.channels.ticker
@@ -36,7 +37,6 @@ class EnemyClusterView: View {
     private var rowSize = 1
     private var translateJob: Job = Job()
     private var firingJob: Job = Job()
-    private var gameclearJob: Job = Job()
     private var collisionCheckJob: Job = Job()
     var fireSound: SoundManager? = null
     companion object {
@@ -54,7 +54,6 @@ class EnemyClusterView: View {
         super.onDetachedFromWindow()
         translateJob.cancel()
         firingJob.cancel()
-        gameclearJob.cancel()
         collisionCheckJob.cancel()
     }
 
@@ -99,16 +98,6 @@ class EnemyClusterView: View {
                     }
                 }}
 
-                gameclearJob.cancel()
-                gameclearJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    GameSceneViewModel.EnemyInfo.enemiesEliminated.collect {
-                        if( !it) return@collect
-                        DataStore.setHighScore(context, GameSceneViewModel.Score.scoreFlow.value.toInt(), MainActivityViewModel.LevelInfo.level)
-                        GameSceneViewModel.EnemyInfo.clearEnemiesAllEliminated()
-                        findNavController().navigate(R.id.action_to_gamecleared_zoom)
-                    }
-                }}
-
                 collisionCheckJob.cancel()
                 collisionCheckJob = lifecycleOwner.lifecycleScope.launch {lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                     GameSceneViewModel.BulletInfo.checkTarget.collect {
@@ -128,9 +117,11 @@ class EnemyClusterView: View {
                                 }
                                 /* 敵機全排除 → クリア */
                                 if (!anyVisible) {
+                                    Log.d("aaaaa", "敵機殲滅!!!!!!!!")
                                     GameSceneViewModel.Vibrator.vibrate(320)
                                     /* 完了後、ゲーム画面に遷移 */
-                                    GameSceneViewModel.EnemyInfo.enemiesAllEliminated()
+                                    DataStore.setHighScore(context, GameSceneViewModel.Score.scoreFlow.value.toInt(), MainActivityViewModel.LevelInfo.level)
+                                    GameSceneViewModel.SwitchScreen.setTrans(SS.GS2GameCleared)
                                 }
                             }
                         }
@@ -154,8 +145,8 @@ class EnemyClusterView: View {
 
     private fun baseLost() {
         GameSceneViewModel.EnemyInfo.enemiesLines.clear()
-        enemyDetailsCallback?.onEnemyBreached()
         GameSceneViewModel.Vibrator.vibrate(320)
+        GameSceneViewModel.SwitchScreen.setTrans(SS.GS2YouDied)
         postInvalidate()
     }
 
@@ -166,10 +157,6 @@ class EnemyClusterView: View {
         }
     }
 
-    private var enemyDetailsCallback: EnemyClusterViewEventCallback? = null
-    fun setOnEnemyClusterViewEventCallback(enemyDetailsCallback: EnemyClusterViewEventCallback) {
-        this.enemyDetailsCallback = enemyDetailsCallback
-    }
     interface EnemyClusterViewEventCallback {
         fun onEnemyBreached()
     }

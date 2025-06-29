@@ -135,14 +135,6 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
     /* 敵機情報 */
     object EnemyInfo {
         val enemiesLines = mutableListOf( EnemyColumn() )
-        private val _enemiesEliminated = MutableStateFlow(false)
-        val enemiesEliminated = _enemiesEliminated.asStateFlow()
-        fun enemiesAllEliminated() {
-            _enemiesEliminated.value = true
-        }
-        fun clearEnemiesAllEliminated() {
-            _enemiesEliminated.value = false
-        }
     }
 
     object AmmoInfo {
@@ -193,6 +185,15 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         fun vibrate(time: Long, amplitude: Int = 255) {
             val effect = VibrationEffect.createOneShot(time, amplitude)
             vibrator.vibrate(effect)
+        }
+    }
+
+    object SwitchScreen  {
+        enum class SS {None, GS2GameCleared, GS2YouDied}
+        private val _translate =  MutableStateFlow(SS.None)
+        val translate = _translate.asStateFlow()
+        fun setTrans(dest: SS) {
+            _translate.value = dest
         }
     }
 }
