@@ -6,10 +6,18 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.findViewTreeLifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import java.util.Timer
 import kotlin.concurrent.schedule
 
 class DropsView: View {
+    private var dispUpdFlowJob: Job? = null
     /* Viewを継承するときのお約束 */
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
@@ -20,10 +28,18 @@ class DropsView: View {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         disptimer.schedule(0, 100) { invalidate() }
+        dispUpdFlowJob = findViewTreeLifecycleOwner()?.lifecycleScope?.launch { findViewTreeLifecycleOwner()?.repeatOnLifecycle(Lifecycle.State.CREATED) {
+            GameSceneViewModel.Finish.finFlow.collect {
+                if(it)
+                    disptimer.cancel()
+            }
+        }}
+
     }
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
         disptimer.cancel()
+        dispUpdFlowJob?.cancel()
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

@@ -39,6 +39,15 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         BulletInfo.init()
     }
 
+    /* 画面遷移要求 */
+    object Finish {
+        private val _finFlow = MutableStateFlow(false)
+        val finFlow = _finFlow.asStateFlow()
+        fun end() {
+            _finFlow.value = true
+        }
+    }
+
     /* 残り弾薬数 */
     object BulletRemain {
         private const val MAX_REMAIN = 80

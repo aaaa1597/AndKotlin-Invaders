@@ -2,8 +2,10 @@ package com.aaa.andkotlininvaders
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
 import java.util.Timer
 import kotlin.concurrent.schedule
@@ -88,11 +90,21 @@ class Bullet(val bulletX: Float, initY: Float, val sender: Sender) {
         }
     }
 
+    private val numstrPaint = Paint().apply {
+        color = Color.CYAN
+        textSize = 50f
+    }
     fun drawBullet(canvas: Canvas) {
-        if (sender == Sender.PLAYER)
+        if (sender == Sender.PLAYER) {
             canvas.drawLine(bulletX,bulletY-bulletSize, bulletX, bulletY, bulletPaint)
-        else
+            canvas.drawText("${id}", bulletX, bulletY-bulletSize/2, numstrPaint)
+            Log.d("aaaaa", "    id=${id} ${sender} x,y=${bulletX},${bulletY} updatetimer=${updatetimer}")
+        }
+        else {
             canvas.drawLine(bulletX, bulletY, bulletX,bulletY-bulletSize, bulletPaint)
+            canvas.drawText("${id}", bulletX, bulletY-bulletSize/2, numstrPaint)
+            Log.d("aaaaa", "    id=${id} ${sender} x,y=${bulletX},${bulletY} updatetimer=${updatetimer}")
+        }
     }
 
     fun destroy() {

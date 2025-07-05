@@ -73,20 +73,8 @@ class GameSceneFragment : Fragment() {
         transFlowJob = lifecycleScope.launch(Dispatchers.Main.immediate) {repeatOnLifecycle(Lifecycle.State.CREATED) {
             GameSceneViewModel.SwitchScreen.translate.collect {
                 when(it) {
-                    GS2GameCleared -> {
-                        parentFragmentManager.beginTransaction()
-                            .setReorderingAllowed(true)
-                            .setCustomAnimations(R.anim.nav_zoom_enter_anim, R.anim.nav_zoom_exit_anim)
-                            .replace(R.id.fcv_container, GameClearedFragment())
-                            .commit();
-                    }
-                    GS2YouDied     -> {
-                        parentFragmentManager.beginTransaction()
-                            .setReorderingAllowed(true)
-                            .setCustomAnimations(R.anim.nav_zoom_enter_anim, R.anim.nav_zoom_exit_anim)
-                            .replace(R.id.fcv_container, YouDiedFragment())
-                            .commit();
-                    }
+                    GS2GameCleared -> findNavController().navigate(R.id.action_to_gamecleared_zoom)
+                    GS2YouDied     -> findNavController().navigate(R.id.action_to_youdied_zoom)
                     None -> {/* 何もしない */}
                 }
             }
@@ -104,6 +92,7 @@ class GameSceneFragment : Fragment() {
         lifecycle.addObserver(soundManager)
         _binding.viwSpaceShipView.fireSound   = soundManager
         _binding.viwEnemyclusterview.fireSound= soundManager
+        (_binding.viwDropview.parent as ViewGroup).removeView(_binding.viwDropview)
     }
 
     override fun onDestroy() {

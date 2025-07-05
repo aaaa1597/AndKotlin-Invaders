@@ -118,6 +118,7 @@ class EnemyClusterView: View {
                                 /* 敵機全排除 → クリア */
                                 if (!anyVisible) {
                                     Log.d("aaaaa", "敵機殲滅!!!!!!!!")
+                                    GameSceneViewModel.Finish.end()
                                     GameSceneViewModel.Vibrator.vibrate(320)
                                     /* 完了後、ゲーム画面に遷移 */
                                     DataStore.setHighScore(context, GameSceneViewModel.Score.scoreFlow.value.toInt(), MainActivityViewModel.LevelInfo.level)
@@ -144,6 +145,7 @@ class EnemyClusterView: View {
     }
 
     private fun baseLost() {
+        GameSceneViewModel.Finish.end()
         GameSceneViewModel.EnemyInfo.enemiesLines.clear()
         GameSceneViewModel.Vibrator.vibrate(320)
         GameSceneViewModel.SwitchScreen.setTrans(SS.GS2YouDied)
