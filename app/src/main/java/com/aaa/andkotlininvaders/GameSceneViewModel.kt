@@ -6,7 +6,6 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.os.VibrationEffect
 import android.os.VibratorManager
-import android.util.Log
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.flow.Flow
@@ -130,14 +129,6 @@ class GameSceneViewModel(application: Application) : AndroidViewModel(applicatio
         data class CollisionCheck(val id: Int, val sender: Sender, val bulletX: Float, val bulletY: Float)
         fun reqCollisionCheck(data: CollisionCheck) {
             _checkTarget.value = data
-        }
-
-        fun debugPrinting() {
-            lock.withLock {
-                _bulletList.forEachIndexed { idx, item ->
-                    Log.d("aaaaa", "    [${idx}] id=${item.id} sender=${item.sender} x=${item.bulletX} Y=${item.bulletY}")
-                }
-            }
         }
     }
 

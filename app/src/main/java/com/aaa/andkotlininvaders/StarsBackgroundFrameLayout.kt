@@ -47,7 +47,7 @@ class StarsBackgroundFrameLayout(context: Context, attributeSet: AttributeSet? =
 
     private fun resetTrails() {
         if (!enableWarp) {
-            trailsList.forEachSafe { trails, iterator ->
+            trailsList.forEachSafe { trails, _ ->
                 trails.reset()
             }
         }
@@ -67,11 +67,11 @@ class StarsBackgroundFrameLayout(context: Context, attributeSet: AttributeSet? =
         GlobalCounter.starsBackgroundTimerFlow.onEach {
             executeIfActive {
                 if (enableWarp) {
-                    trailsList.forEachSafe { trails, iterator ->
+                    trailsList.forEachSafe { trails, _ ->
                         trails.translate()
                     }
                 } else {
-                    starsList.forEachSafe { stars, iterator ->
+                    starsList.forEachSafe { stars, _ ->
                         stars.translate()
                     }
                 }

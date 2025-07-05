@@ -281,30 +281,6 @@ class SpaceShipView: View {
         GameSceneViewModel.BulletInfo.addBullet(Bullet(getShipX(), getShipY(), Sender.PLAYER))
     }
 
-    private fun checkCollision(id: Int, sender: Sender, bulletX: Float, bulletY: Float) {
-        /* YがSpaceShipに未達 */
-        if (bulletY.roundToInt() > top)
-            return
-
-        /* YがSpaceShipに到達, XもSpaceShip本体に衝突 */
-        if (mainBodyYRange.contains(bulletY) && mainBodyXRange.contains(bulletX)) {
-            onPlayerHit()
-        }
-        /* YがSpaceShipに到達, XもSpaceShip左ウイングに衝突 */
-        else if (wingsYRange.contains(bulletY) && leftWingsXRange.contains(bulletX)) {
-            onPlayerHit()
-        }
-        /* YがSpaceShipに到達, XもSpaceShip右ウイングに衝突 */
-        else if (wingsYRange.contains(bulletY) && rightWingsXRange.contains(bulletX)) {
-            onPlayerHit()
-        }
-        else
-            return; /* 衝突してない */
-
-        /* 衝突した弾丸は消去 */
-        GameSceneViewModel.BulletInfo.removeAllBullets(id)
-    }
-
     private fun onPlayerHit() {
         GameSceneViewModel.Shake.onHit()
         GameSceneViewModel.LifeGaugeInfo.onHit()
