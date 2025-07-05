@@ -10,7 +10,6 @@ import android.graphics.Picture
 import android.graphics.Rect
 import android.graphics.drawable.PictureDrawable
 import android.util.AttributeSet
-import android.util.Log
 import android.util.Range
 import android.view.MotionEvent
 import android.view.View
@@ -182,6 +181,7 @@ class SpaceShipView: View {
 
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
+        bursttimer?.cancel()
         spaceShipxPosJob.cancel()
         collisionCheckAmmoJob.cancel()
         collisionCheckBulletJob.cancel()
