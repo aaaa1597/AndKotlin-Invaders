@@ -101,8 +101,4 @@ class GameSceneFragment : Fragment() {
         remainFlowJob.cancel()
         transFlowJob.cancel()
     }
-
-    companion object {
-        fun newInstance() = GameSceneFragment()
-    }
 }

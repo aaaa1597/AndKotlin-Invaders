@@ -1,7 +1,6 @@
 package com.aaa.andkotlininvaders
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +8,7 @@ import android.view.ViewGroup
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.aaa.andkotlininvaders.databinding.FragmentCountdownBinding
+import com.aaa.andkotlininvaders.GameSceneViewModel.SwitchScreen.SS
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -38,6 +38,7 @@ class CountdownFragment : Fragment() {
                 delay(1000)
             }
             /* 完了後、ゲーム画面に遷移 */
+            GameSceneViewModel.SwitchScreen.setTrans(SS.None)
             findNavController().navigate(R.id.action_to_gameScene_zoom)
         }
     }
