@@ -61,7 +61,7 @@ class EnemyClusterView: View {
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
         initEnemies(fireSound)
-        ObjectAnimator.ofFloat(this, "translationY", (-h).toFloat(), 0f).apply {
+        ObjectAnimator.ofFloat(this, "translationY", (-h/5).toFloat(), 0f).apply {
             duration = 2200
             start()
         }
